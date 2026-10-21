@@ -123,6 +123,26 @@ test('os characters da barra de baixo podem ser escondidos nas preferencias',()=
   const store=d.validateStore({version:3,activeProfile:'p1',profiles:[{id:'p1',name:'Knight',sessions:[hunt],preferences:prefs}]});
   assert.equal(store.profiles[0].preferences.characters,false);
 });
+test('as tabs do perfil nomeiam as cacas e ficam no backup',()=>{
+  const base={id:'p1',name:'Knight',sessions:[],preferences:{}};
+  const profile=d.validateProfile({...base,tabs:['cave rat','dragons','cave rat',''],activeTab:'dragons'});
+  assert.deepEqual(profile.tabs,['cave rat','dragons']);
+  assert.equal(profile.activeTab,'dragons');
+  // A tab em uso tem que existir na lista.
+  assert.equal(d.validateProfile({...base,tabs:['cave rat'],activeTab:'nope'}).activeTab,undefined);
+  assert.equal(d.validateProfile({...base,tabs:['cave rat']}).activeTab,undefined);
+  // A tab da caca e guardada com a hunt.
+  const hunt={id:'h1',...d.parse(sample),group:'cave rat',name:'cave rat'};
+  const withGroup=d.validateProfile({...base,sessions:[hunt]});
+  assert.equal(withGroup.sessions[0].group,'cave rat');
+  assert.equal(withGroup.sessions[0].name,'cave rat');
+  // Sem tab, a hunt continua sem grupo.
+  assert.equal(d.validateProfile({...base,sessions:[{id:'h2',...d.parse(sample)}]}).sessions[0].group,undefined);
+  // As tabs do perfil seguem para o backup.
+  const store=d.validateStore({version:3,activeProfile:'p1',profiles:[profile]});
+  assert.deepEqual(store.profiles[0].tabs,['cave rat','dragons']);
+  assert.equal(store.profiles[0].activeTab,'dragons');
+});
 test('os periodos em andamento e o log das semanas e meses ficam no backup',()=>{
   const base={version:3,activeProfile:'p1',profiles:[{id:'p1',name:'Knight',sessions:[],preferences:{}}]};
   const store=d.validateStore({...base,periods:{week:'2026-10-19',month:'2026-10-01'},history:[

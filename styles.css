@@ -90,6 +90,16 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .profile-new{width:100%;margin-top:10px;padding:9px;font-size:14px;font-weight:normal;background:none;border-style:dashed;color:var(--muted)}
 .profile-new:hover{color:var(--accent);filter:none}
 
+/* The tabs of the hunts: each one names the analyzers pasted there. */
+.tabs-bar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:0 0 14px}
+.tab{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:5px 12px;font-size:14px;font-weight:normal;background:linear-gradient(var(--button-top),var(--button-bottom));color:var(--muted)}
+.tab:hover{color:var(--text);filter:brightness(1.12)}
+.tab.active{color:var(--accent);box-shadow:inset 1px 1px var(--shine),inset -1px -1px var(--shadow),0 0 0 1px var(--accent)}
+.tab.add{font-size:17px;font-weight:bold;padding:2px 12px}
+.tab-remove{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;font-size:15px;line-height:1;color:var(--muted);cursor:pointer;opacity:.6}
+.tab-remove:hover{color:var(--bad);opacity:1}
+.tab-remove:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.tabs-bar+.paste-hint{margin-top:0}
 .range-open{min-height:42px;font-size:14px;padding:8px 14px}
 /* The week and month view: a table with the date, the raw XP and the balance,
    and the total of the period in the last line. The columns are fixed, so the

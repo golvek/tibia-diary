@@ -139,6 +139,25 @@
     if(clean)session.name=clean;
     return session;
   }
+  // The tab of a hunt: the group of hunts that share the same name.
+  const cleanGroup = value => typeof value==='string'?value.trim().slice(0,40):'';
+  function withGroup(session,group) {
+    const clean=cleanGroup(group);
+    if(clean)session.group=clean;
+    return session;
+  }
+  // The tabs of a profile: the names of the hunts, in the order they were made.
+  function validateTabs(value) {
+    if(!Array.isArray(value))return [];
+    const tabs=[];
+    for(const name of value) {
+      if(typeof name!=='string')continue;
+      const clean=name.trim().slice(0,40);
+      if(clean&&!tabs.includes(clean))tabs.push(clean);
+      if(tabs.length>=30)break;
+    }
+    return tabs;
+  }
 
   function sessionDay(session,reset='00:00') {
     if(!validReset(reset))throw new Error('Invalid daily reset time.');
@@ -177,9 +196,9 @@
       if(!s||typeof s.id!=='string'||!/^[a-zA-Z0-9_-]{1,100}$/.test(s.id)||ids.has(s.id))throw new Error('Invalid or duplicate session ID.');ids.add(s.id);
       if(data.version===1||s.legacy) {
         if(!validDate(s.date)||!Number.isInteger(s.minutes)||s.minutes<1||s.minutes>1440||!Number.isSafeInteger(s.xp)||s.xp<0||s.xp>1e12||!Number.isSafeInteger(s.profit)||Math.abs(s.profit)>1e12)throw new Error('Invalid legacy session.');
-        return withName({id:s.id,legacy:true,date:s.date,minutes:s.minutes,seconds:s.minutes*60,xp:s.xp,profit:s.profit,balance:s.profit,character:String(s.character||'').slice(0,80),notes:String(s.notes||'').slice(0,2000)},s.name);
+        return withGroup(withName({id:s.id,legacy:true,date:s.date,minutes:s.minutes,seconds:s.minutes*60,xp:s.xp,profit:s.profit,balance:s.profit,character:String(s.character||'').slice(0,80),notes:String(s.notes||'').slice(0,2000)},s.name),s.group);
       }
-      return withName({id:s.id,...parseCached(s.raw)},s.name);
+      return withGroup(withName({id:s.id,...parseCached(s.raw)},s.name),s.group);
     });
     return {version:2,sessions,preferences:preferences(data.preferences)};
   }
@@ -238,6 +257,10 @@
     const ids=new Set();
     for(const expense of expenses){if(ids.has(expense.id))throw new Error('Duplicate expense ID.');ids.add(expense.id);}
     const result={id:profile.id,name,created:typeof profile.created==='string'&&validDate(profile.created)?profile.created:today(),sessions:data.sessions,preferences:data.preferences,expenses};
+    // The tabs of the profile: the names of the hunts, and the one in use.
+    const tabs=validateTabs(profile.tabs);
+    if(tabs.length)result.tabs=tabs;
+    if(typeof profile.activeTab==='string'&&tabs.includes(profile.activeTab))result.activeTab=profile.activeTab;
     // The photo is a small PNG kept as a data url, so the backup carries it too.
     // The photo is a small PNG as a data url, or a file kept in the assets folder.
     if(typeof profile.photo==='string'&&((/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(profile.photo)&&profile.photo.length<=500000)||/^assets\/[A-Za-z0-9._-]+\.png$/.test(profile.photo)))result.photo=profile.photo;

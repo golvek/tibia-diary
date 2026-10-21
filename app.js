@@ -19,7 +19,7 @@ function newId(){return window.crypto&&crypto.randomUUID?crypto.randomUUID():'se
 function status(message,error=false){toast(message,error);}
 function currentProfile(){return store.profiles.find(p=>p.id===store.activeProfile)||store.profiles[0];}
 function totalHunts(){return store.profiles.reduce((n,p)=>n+p.sessions.length,0);}
-function applyProfile(profile){state={version:2,sessions:profile.sessions,preferences:profile.preferences,expenses:profile.expenses||[]};}
+function applyProfile(profile){state={version:2,sessions:profile.sessions,preferences:profile.preferences,expenses:profile.expenses||[],tabs:profile.tabs||[],activeTab:profile.activeTab||''};}
 function blankProfile(name){
   return {id:newId(),name:name||'Profile '+(store.profiles.length+1),created:Diary.today(),sessions:[],expenses:[],preferences:Diary.preferences()};
 }
@@ -37,10 +37,10 @@ function writeStore(){
 function save(next,restore=false){
   if(blocked&&!restore){toast('Saving is blocked to protect existing data.');return false;}
   try{
-    const profile=Diary.validateProfile({...currentProfile(),sessions:next.sessions,preferences:next.preferences,expenses:next.expenses});
+    const profile=Diary.validateProfile({...currentProfile(),sessions:next.sessions,preferences:next.preferences,expenses:next.expenses,tabs:next.tabs||[],activeTab:next.activeTab||''});
     store={...store,profiles:store.profiles.map(p=>p.id===profile.id?profile:p)};
     if(!writeStore())return false;
-    state={version:2,sessions:profile.sessions,preferences:profile.preferences,expenses:profile.expenses};
+    state={version:2,sessions:profile.sessions,preferences:profile.preferences,expenses:profile.expenses,tabs:profile.tabs||[],activeTab:profile.activeTab||''};
     blocked=false;$('warning').hidden=true;render();return true;
   }catch(error){toast('Could not save: '+error.message);return false;}
 }
@@ -70,6 +70,9 @@ function importAnalyzer(raw){
     if(previous&&previous.end===parsed.end&&previous.raw.replace(/\r/g,'').trim()===raw.replace(/\r/g,'').trim()){status('Session already saved.');return;}
     const commit=()=>{
       const session={id:previous?.id||newId(),...parsed};
+      // The hunt of the tab in use takes the name of the tab.
+      const tab=state.activeTab||'';
+      if(tab){session.name=tab;session.group=tab;}
       if(save({...state,sessions:[...state.sessions.filter(s=>s.id!==session.id),session],preferences:{...state.preferences,anchor:Diary.sessionDay(session,state.preferences.reset)}})){
         status(`${previous?'Updated':'Saved'}: ${dateLabel(session.date)} · ${session.start.slice(11)}–${session.end.slice(11)} · ${duration(session.seconds)} · Balance ${number(session.balance)}.`);
       }else status('Not saved. Keep a copy of your report before leaving.',true);
@@ -498,6 +501,61 @@ function renderRangeView(){
   $('range-week').classList.toggle('active',rangeKind==='week');
   $('range-month').classList.toggle('active',rangeKind==='month');
 }
+// The tabs of the profile: each one is a kind of hunt, and the analyzers
+// pasted there take its name.
+function renderTabs(){
+  const tabs=state.tabs||[];
+  const active=state.activeTab||'';
+  const all=`<button type="button" class="tab${active?'':' active'}" data-tab="">All</button>`;
+  const list=tabs.map(name=>`<button type="button" class="tab${active===name?' active':''}" data-tab="${esc(name)}" title="${esc(name)}">${esc(name)}<span class="tab-remove" data-remove-tab="${esc(name)}" role="button" tabindex="0" aria-label="Remove the tab ${esc(name)}">×</span></button>`).join('');
+  $('tabs-bar').innerHTML=all+list+'<button type="button" class="tab add" data-new-tab="+">+</button>';
+}
+function setTab(name){
+  if(name===state.activeTab)return;
+  save({...state,activeTab:name});
+}
+function addTab(name){
+  const clean=(name||'').trim().slice(0,40);
+  if(!clean){toast('Type the name of the hunt.',true);return;}
+  const tabs=state.tabs||[];
+  if(tabs.includes(clean)){setTab(clean);return;}
+  save({...state,tabs:[...tabs,clean],activeTab:clean});
+}
+function removeTab(name){
+  const tabs=(state.tabs||[]).filter(t=>t!==name);
+  // The hunts of the tab keep the name, they just stop belonging to it.
+  const sessions=state.sessions.map(s=>{
+    if(s.group!==name)return s;
+    const copy={...s};delete copy.group;return copy;
+  });
+  save({...state,tabs,sessions,activeTab:state.activeTab===name?'':state.activeTab});
+}
+$('tabs-bar').addEventListener('click',e=>{
+  const remove=e.target.closest('[data-remove-tab]');
+  if(remove){e.stopPropagation();removeTab(remove.dataset.removeTab);return;}
+  const add=e.target.closest('[data-new-tab]');
+  if(add){openTabForm();return;}
+  const tab=e.target.closest('[data-tab]');
+  if(tab)setTab(tab.dataset.tab);
+});
+$('tabs-bar').addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const remove=e.target.closest('[data-remove-tab]');
+  if(!remove)return;
+  e.preventDefault();
+  removeTab(remove.dataset.removeTab);
+});
+function openTabForm(){
+  $('tab-name').value='';
+  $('tab-dialog').showModal();
+  $('tab-name').focus();
+}
+$('tab-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=$('tab-name').value;
+  $('tab-dialog').close();
+  addTab(name);
+});
 function render(){
   // The week and the month turn over on their own, following the daily reset.
   if(rollPeriods())writeStore();
@@ -507,8 +565,11 @@ function render(){
   $('day-button').textContent=`${weekdayLabel(prefs.anchor)} ${dateLabel(prefs.anchor)}`;
   $('field-checkboxes').innerHTML=Diary.fields.map(f=>`<label><input type="checkbox" value="${f.key}" ${prefs.visible.includes(f.key)?'checked':''}>${esc(f.label)}</label>`).join('');
   // Oldest first, so the boxes read from left to right as the day happened.
-  const sessions=state.sessions.filter(s=>day(s)===prefs.anchor).sort((a,b)=>(a.start||a.date).localeCompare(b.start||b.date));
+  // Only the hunts of the tab in use are shown.
+  const tab=prefs.activeTab||state.activeTab||'';
+  const sessions=state.sessions.filter(s=>day(s)===prefs.anchor&&(!tab||s.group===tab)).sort((a,b)=>(a.start||a.date).localeCompare(b.start||b.date));
   $('sessions').innerHTML=sessions.length?cardsMarkup(sessions):'<div class="empty">No hunts for this day. Paste a report above.</div>';
+  renderTabs();
   renderProfiles();
   renderCharacters();
   renderRangeView();

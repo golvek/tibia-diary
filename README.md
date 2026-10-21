@@ -32,6 +32,11 @@ na branch `main`.
 1. **Cole o report com `Ctrl+V` em qualquer lugar da página.** Não há campo de texto: o
    app reconhece o formato do Hunt Analyzer e salva sozinho, avisando no rodapé da tela.
    Colar texto que não é um report mostra o erro do que está errado.
+   **Tabs de hunt:** a aba `Daily hunts` tem uma fileira de tabs com o nome de cada tipo de
+   caça (`cave rat`, `dragons`...). O `+` cria uma tab nova. Com a tab em uso, o report colado
+   entra nela e o analyzer **já fica com o nome da tab** — não precisa renomear um por um. A
+   tab `All` mostra todas as caçadas do dia; as outras mostram só as delas. O `×` apaga a tab
+   (as caçadas dela continuam guardadas, só perdem o vinculo com a tab).
 2. **Cada caçada vira uma caixa**, com os números do report, as moedas, o `Balance` em
    verde e as seções `Killed Monsters` / `Looted Items`.
 3. **Você pode colar quantas caçadas quiser.** As caixas do dia selecionado ficam na tela.
