@@ -196,11 +196,11 @@ body{padding-left:52px}
 .character-value{font-size:18px;font-weight:bold;font-variant-numeric:tabular-nums}
 .character-value.positive{color:var(--good)}
 .character-value.negative{color:var(--bad)}
-#character-total{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:12px 2px 0;margin-top:6px;border-top:2px solid var(--edge)}
-.character-total-name{font-size:17px;font-weight:bold}
-.character-total-item{display:flex;align-items:baseline;gap:8px;font-size:17px;font-weight:bold;font-variant-numeric:tabular-nums}
-.character-total-item.character-profit.positive{color:var(--good)}
-.character-total-item.character-profit.negative{color:var(--bad)}
+/* The sum of every profile, in the corner: raw XP | profit. */
+#character-total{display:flex;align-items:baseline;justify-content:flex-end;gap:8px;padding:10px 2px 0;margin-top:6px;border-top:2px solid var(--edge);font-size:18px;font-weight:bold;font-variant-numeric:tabular-nums}
+#character-total .positive{color:var(--good)}
+#character-total .negative{color:var(--bad)}
+.character-sep{color:var(--muted);font-weight:normal}
 #character-total .character-profit{font-variant-numeric:tabular-nums;opacity:1}
 @media(max-width:760px){#character-list{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:650px){.side-menu{width:44px}.side-tab{width:34px;min-height:34px}body{padding-left:44px}.history-row{grid-template-columns:60px 1fr auto;gap:8px}}

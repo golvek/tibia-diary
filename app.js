@@ -642,7 +642,7 @@ function renderCharacters(){
     return `<div class="character-card${current?' current':''}"><div class="character-card-name">${esc(profile.name)}</div><div class="character-card-row"><span class="character-label">Raw XP</span><span class="character-value">${t.hunts?esc(number(t.xp)):'—'}</span></div><div class="character-card-row"><span class="character-label">Profit</span><span class="character-value ${t.profit>=0?'positive':'negative'}">${esc(number(t.profit))}</span></div></div>`;
   }).join('');
   $('character-list').innerHTML=rows;
-  $('character-total').innerHTML=`<span class="character-total-name">All characters</span><span class="character-total-item"><span class="character-label">Raw XP</span><span>${esc(number(totalXp))}</span></span><span class="character-total-item character-profit ${total>=0?'positive':'negative'}"><span class="character-label">Profit</span><span>${esc(number(total))}</span></span>`;
+  $('character-total').innerHTML=`<span>${esc(number(totalXp))}</span><span class="character-sep">|</span><span class="${total>=0?'positive':'negative'}">${esc(number(total))}</span>`;
   $('character-week').classList.toggle('active',kind==='week');
   $('character-month').classList.toggle('active',kind==='month');
   $('character-range').textContent=kind==='week'?`${shortDate(from)} – ${shortDate(Diary.period('week',today).end)}`:`${monthName(from)}`;
