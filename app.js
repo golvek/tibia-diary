@@ -467,7 +467,7 @@ function rangeViewMarkup(kind){
 // The totals of the week and the month, on the bar at the bottom of the screen.
 function renderTotalsBar(){
   const panel=$('totals-bar');
-  panel.innerHTML=['week','month'].map(kind=>{
+  panel.innerHTML=['week'].map(kind=>{
     const s=periodSummary(kind);
     const title=kind==='week'?'week total':'month total';
     const sign=s.balance>=0?'positive':'negative';
