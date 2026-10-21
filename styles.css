@@ -92,9 +92,9 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 
 .range-open{min-height:42px;font-size:14px;padding:8px 14px}
 /* The week and month view: a table with the date, the raw XP and the balance,
-   next to the summary of the period. The columns are fixed, so the date stays
-   close to its numbers and every row lines up with the one above it. */
-.range-view{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
+   and the total of the period in the last line. The columns are fixed, so the
+   date stays close to its numbers and every row lines up with the one above it. */
+.range-view{display:block}
 .range-wrap{overflow-x:auto;border:1px solid var(--edge);box-shadow:1px 1px var(--shine);background:var(--inset)}
 .range-table{width:auto;border-collapse:collapse;table-layout:fixed;font-size:15px}
 .range-table th{background:none;box-shadow:none;text-align:left;font-size:12px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:0 12px 9px;border-bottom:1px solid var(--edge)}
@@ -142,6 +142,11 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .range-table td button.range-link{font:inherit;font-size:15px;font-weight:bold;text-align:left;background:none;border:0;box-shadow:none;padding:0;min-height:0;color:var(--text);cursor:pointer}
 .range-table td button.range-link:hover{color:var(--accent);filter:none}
 .range-row.current .range-link{color:var(--accent)}
+/* The total of the period: the last line of the table. */
+.range-row.total td{border-top:2px solid var(--edge);border-bottom:0;padding-top:10px;font-size:16px}
+.range-row.total .range-total-label{font-weight:bold}
+.range-row.total .col-xp{color:var(--text)}
+.range-row.total .range-pin{margin-left:8px;vertical-align:-3px}
 /* The pinned cards stay at the bottom of the main screen, under the hunts. */
 .pinned-totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0 0}
 @media(max-width:900px){.range-view{grid-template-columns:minmax(0,1fr)}.range-summary-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}.pinned-totals{grid-template-columns:minmax(0,1fr)}}

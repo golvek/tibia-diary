@@ -429,17 +429,19 @@ function periodSummary(kind){
   }
   return {range,xp,balance,hunts,days,label:kind==='week'?`${shortDate(range.start)} – ${shortDate(range.end)}`:`${monthName(range.start)}`};
 }
-// The card with the totals of a period. It is used next to the table of the
-// calendar and pinned on the main screen.
+// The card with the totals of a period. It is pinned on the main screen.
 const PIN_SVG='<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="pin-fill" d="M6.3 1.6h3.4l-.5 3.3 2.3 2.3v1.2H4.5V7.2l2.3-2.3z"/><path d="M8 8.4v6"/></svg>';
 function isPinned(kind){return Array.isArray(state.preferences.pinned)&&state.preferences.pinned.includes(kind);}
+// The pin fixes the card of the period on the main screen.
+function pinButton(kind){
+  const title=kind==='week'?'Week total':'Month total';
+  const pinned=isPinned(kind);
+  return `<button type="button" class="range-pin" data-pin="${kind}" aria-pressed="${pinned}" title="${pinned?'Unpin this card from the main screen':'Pin this card on the main screen'}" aria-label="${pinned?'Unpin':'Pin'} ${title}">${PIN_SVG}</button>`;
+}
 function summaryCard(kind){
   const s=periodSummary(kind);
   const title=kind==='week'?'Week total':'Month total';
-  const pinned=isPinned(kind);
-  // The pin inside the card fixes it on the main screen.
-  const pin=`<button type="button" class="range-pin" data-pin="${kind}" aria-pressed="${pinned}" title="${pinned?'Unpin this card from the main screen':'Pin this card on the main screen'}" aria-label="${pinned?'Unpin':'Pin'} ${title}">${PIN_SVG}</button>`;
-  return `<aside class="range-summary"><div class="range-summary-head"><h3 class="range-summary-title">${esc(title)}</h3>${pin}</div><p class="range-summary-period">${esc(s.label)}</p><dl class="range-summary-list">
+  return `<aside class="range-summary"><div class="range-summary-head"><h3 class="range-summary-title">${esc(title)}</h3>${pinButton(kind)}</div><p class="range-summary-period">${esc(s.label)}</p><dl class="range-summary-list">
     <div class="range-summary-item"><dt>Raw XP</dt><dd>${s.days?esc(number(s.xp)):'—'}</dd></div>
     <div class="range-summary-item total"><dt>Balance</dt><dd class="${s.balance>=0?'positive':'negative'}">${s.days?esc(number(s.balance)):'—'}</dd></div>
   </dl></aside>`;
@@ -486,9 +488,11 @@ function rangeViewMarkup(kind){
   // Every day of the period gets a line, so the month shows the whole month.
   // The days without hunts stay thin and dim, and the ones with hunts stand out.
   const rows=cells.map(cell=>cell.html);
-  // The summary sits next to the table, so the totals of the period are
-  // always on screen, even with a month full of days.
-  return {label,html:`<div class="range-view"><div class="range-wrap"><table class="range-table"><thead><tr><th scope="col" class="col-date">Date</th><th scope="col" class="col-xp">Raw XP</th><th scope="col" class="col-balance">Balance</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>${summaryCard(kind)}</div>`};
+  // The total of the period is the last line of the table.
+  const summary=periodSummary(kind);
+  const totalLabel=kind==='week'?'Week total':'Month total';
+  const total=`<tr class="range-row total"><td class="col-date"><span class="range-total-label">${esc(totalLabel)}</span>${pinButton(kind)}</td><td class="col-xp">${summary.days?esc(number(summary.xp)):'—'}</td><td class="col-balance ${summary.balance>=0?'positive':'negative'}">${summary.days?esc(number(summary.balance)):'—'}</td></tr>`;
+  return {label,html:`<div class="range-view"><div class="range-wrap"><table class="range-table"><thead><tr><th scope="col" class="col-date">Date</th><th scope="col" class="col-xp">Raw XP</th><th scope="col" class="col-balance">Balance</th></tr></thead><tbody>${rows.join('')}</tbody><tfoot>${total}</tfoot></table></div></div>`};
 }
 // The pinned cards stay on the main screen, next to the hunts of the day.
 function renderPinnedTotals(){
