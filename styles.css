@@ -116,12 +116,6 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .range-summary-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .range-summary-title{margin:0;font-size:13px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
 .range-summary-period{margin:2px 0 10px;font-size:13px;color:var(--muted)}
-.range-pin{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-height:28px;padding:0;background:none;border:0;box-shadow:none;color:var(--muted);cursor:pointer}
-.range-pin svg{width:14px;height:14px}
-.range-pin:hover{color:var(--accent);filter:none}
-.range-pin[aria-pressed=true]{color:var(--accent)}
-.range-pin .pin-fill{fill:none}
-.range-pin[aria-pressed=true] .pin-fill{fill:currentColor}
 .range-row{cursor:pointer}
 .range-row.blank{cursor:default}
 .range-row.blank td{opacity:.5}
@@ -139,19 +133,19 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .range-row.total td{border-top:2px solid var(--edge);border-bottom:0;padding-top:10px;font-size:16px}
 .range-row.total .range-total-label{font-weight:bold}
 .range-row.total .col-xp{color:var(--text)}
-.range-row.total .range-pin{margin-left:8px;vertical-align:-3px}
-/* The pinned totals stay on the bottom bar of the screen, like the side menu. */
-.pinned-totals{position:fixed;left:var(--side);right:0;bottom:0;z-index:25;display:flex;flex-direction:column;background:var(--panel);border-top:1px solid var(--edge);box-shadow:0 -1px var(--shine);padding:7px 18px}
-.pinned-total{display:flex;align-items:baseline;gap:10px;padding:2px 0;font-size:15px}
-.pinned-total-label{font-weight:bold}
-.pinned-total-xp{color:var(--muted);font-variant-numeric:tabular-nums}
-.pinned-total-balance{font-weight:bold;font-variant-numeric:tabular-nums}
-.pinned-total-balance.positive{color:var(--good)}
-.pinned-total-balance.negative{color:var(--bad)}
-.pinned-total .range-pin{margin-left:auto}
-body.has-pinned-bar .trash{bottom:76px}
+/* The totals of the week and the month, on the bar at the bottom of the screen. */
+.totals-bar{position:fixed;left:var(--side);right:0;bottom:0;z-index:25;display:flex;align-items:baseline;justify-content:flex-end;background:var(--panel);border-top:1px solid var(--edge);box-shadow:0 -1px var(--shine);padding:11px 18px}
+.bar-total{display:flex;align-items:baseline;gap:11px;font-size:16px}
+.bar-total+.bar-total{margin-left:30px;padding-left:30px;border-left:1px solid var(--edge)}
+.bar-label{font-size:12px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
+.bar-xp{color:var(--muted);font-variant-numeric:tabular-nums}
+.bar-sep{color:var(--shine)}
+.bar-balance{font-size:20px;font-weight:bold;font-variant-numeric:tabular-nums}
+.bar-balance.positive{color:var(--good)}
+.bar-balance.negative{color:var(--bad)}
+body.has-totals-bar .trash{bottom:70px}
 @media(max-width:900px){.range-view{display:block}}
-@media(max-width:650px){.range-table th.col-xp{width:120px}.range-table th.col-balance{width:140px}.range-table th{padding:0 8px 7px}.range-table td{padding:8px}.range-table td,.range-table td button.range-link{font-size:14px}.range-weekday{margin-right:4px}.pinned-totals{padding:6px 10px}.pinned-total{gap:8px;font-size:14px}}
+@media(max-width:650px){.range-table th.col-xp{width:120px}.range-table th.col-balance{width:140px}.range-table th{padding:0 8px 7px}.range-table td{padding:8px}.range-table td,.range-table td button.range-link{font-size:14px}.range-weekday{margin-right:4px}.totals-bar{flex-direction:column;align-items:flex-end;gap:4px;padding:9px 10px}.bar-total+.bar-total{margin-left:0;padding-left:0;border-left:0}}
 #view-calendar{border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shine),inset -1px -1px var(--shadow);background:var(--panel);max-width:1320px;margin:24px auto;padding:0 18px 18px}
 .view-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 0 6px}
 .range-toggle{display:flex}

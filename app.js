@@ -429,28 +429,6 @@ function periodSummary(kind){
   }
   return {range,xp,balance,hunts,days,label:kind==='week'?`${shortDate(range.start)} – ${shortDate(range.end)}`:`${monthName(range.start)}`};
 }
-// The card with the totals of a period. It is pinned on the main screen.
-const PIN_SVG='<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="pin-fill" d="M6.3 1.6h3.4l-.5 3.3 2.3 2.3v1.2H4.5V7.2l2.3-2.3z"/><path d="M8 8.4v6"/></svg>';
-function isPinned(kind){return Array.isArray(state.preferences.pinned)&&state.preferences.pinned.includes(kind);}
-// The pin fixes the card of the period on the main screen.
-function pinButton(kind){
-  const title=kind==='week'?'Week total':'Month total';
-  const pinned=isPinned(kind);
-  return `<button type="button" class="range-pin" data-pin="${kind}" aria-pressed="${pinned}" title="${pinned?'Unpin this card from the main screen':'Pin this card on the main screen'}" aria-label="${pinned?'Unpin':'Pin'} ${title}">${PIN_SVG}</button>`;
-}
-// Fixing a card on the main screen is done from the card itself.
-function togglePin(kind){
-  if(kind!=='week'&&kind!=='month')return;
-  const list=Array.isArray(state.preferences.pinned)?[...state.preferences.pinned]:[];
-  const next=list.includes(kind)?list.filter(k=>k!==kind):[...list,kind];
-  updatePrefs({pinned:next});
-}
-document.addEventListener('click',e=>{
-  const pin=e.target.closest('[data-pin]');
-  if(!pin)return;
-  e.stopPropagation();
-  togglePin(pin.dataset.pin);
-});
 // One table with the date, the raw XP and the balance of every day of the
 // week or of the month. The numbers are exact, so the days can be compared.
 function rangeViewMarkup(kind){
@@ -483,23 +461,21 @@ function rangeViewMarkup(kind){
   // The total of the period is the last line of the table.
   const summary=periodSummary(kind);
   const totalLabel=kind==='week'?'Week total':'Month total';
-  const total=`<tr class="range-row total"><td class="col-date"><span class="range-total-label">${esc(totalLabel)}</span>${pinButton(kind)}</td><td class="col-xp">${summary.days?esc(number(summary.xp)):'—'}</td><td class="col-balance ${summary.balance>=0?'positive':'negative'}">${summary.days?esc(number(summary.balance)):'—'}</td></tr>`;
+  const total=`<tr class="range-row total"><td class="col-date"><span class="range-total-label">${esc(totalLabel)}</span></td><td class="col-xp">${summary.days?esc(number(summary.xp)):'—'}</td><td class="col-balance ${summary.balance>=0?'positive':'negative'}">${summary.days?esc(number(summary.balance)):'—'}</td></tr>`;
   return {label,html:`<div class="range-view"><div class="range-wrap"><table class="range-table"><thead><tr><th scope="col" class="col-date">Date</th><th scope="col" class="col-xp">Raw XP</th><th scope="col" class="col-balance">Balance</th></tr></thead><tbody>${rows.join('')}</tbody><tfoot>${total}</tfoot></table></div></div>`};
 }
-// The pinned totals stay on the bottom bar of the screen, one line each.
-function renderPinnedTotals(){
-  const pinned=Array.isArray(state.preferences.pinned)?state.preferences.pinned:[];
-  const panel=$('pinned-totals');
-  panel.hidden=!pinned.length;
-  panel.innerHTML=pinned.map(kind=>{
+// The totals of the week and the month, on the bar at the bottom of the screen.
+function renderTotalsBar(){
+  const panel=$('totals-bar');
+  panel.innerHTML=['week','month'].map(kind=>{
     const s=periodSummary(kind);
     const title=kind==='week'?'week total':'month total';
     const sign=s.balance>=0?'positive':'negative';
-    return `<div class="pinned-total"><span class="pinned-total-label">${esc(title)}</span><span class="pinned-total-xp">${s.days?esc(compact(s.xp)):'—'} xp</span><span class="character-sep">|</span><span class="pinned-total-balance ${sign}">${s.days?esc(compact(s.balance)):'—'}<span class="coin"></span></span>${pinButton(kind)}</div>`;
+    return `<div class="bar-total"><span class="bar-label">${esc(title)}</span><span class="bar-xp">${s.days?esc(compact(s.xp)):'—'} xp</span><span class="bar-sep">|</span><span class="bar-balance ${sign}">${s.days?esc(compact(s.balance)):'—'}<span class="coin"></span></span></div>`;
   }).join('');
   // The bar is fixed on the bottom, so the page keeps room for it.
-  document.body.classList.toggle('has-pinned-bar',pinned.length>0);
-  document.body.style.paddingBottom=pinned.length?panel.offsetHeight+'px':'0px';
+  document.body.classList.add('has-totals-bar');
+  document.body.style.paddingBottom=panel.offsetHeight+'px';
 }
 function renderRangeView(){
   const view=rangeViewMarkup(rangeKind);
@@ -521,7 +497,7 @@ function render(){
   renderProfiles();
   renderCharacters();
   renderRangeView();
-  renderPinnedTotals();
+  renderTotalsBar();
   renderBrand();
   // An open window shows the current numbers, not the ones it had when opened.
   if($('statement-dialog').open&&statementDate){

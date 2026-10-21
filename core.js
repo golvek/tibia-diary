@@ -166,11 +166,6 @@
       visible=filtered.length?filtered:(source.visible.length?[...defaults]:[]);
     }
     const result={visible,period:PERIODS.includes(source.period)?source.period:'day',anchor:validDate(source.anchor)?source.anchor:currentDay(reset),reset};
-    // The week and month cards can be pinned on the main screen.
-    if(Array.isArray(source.pinned)) {
-      const list=[...new Set(source.pinned.filter(k=>k==='week'||k==='month'))];
-      if(list.length)result.pinned=list;
-    }
     return result;
   }
 

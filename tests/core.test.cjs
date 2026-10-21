@@ -113,19 +113,6 @@ test('preferências corrompidas voltam ao padrão sem apagar seleções vazias',
   assert.deepEqual(d.preferences(null).visible,[...d.defaults]);
   assert.equal(d.validate({version:2,sessions:[],preferences:null}).preferences.reset,'00:00');
 });
-test('os cards fixados na tela principal ficam salvos no backup',()=>{
-  assert.equal(d.preferences({}).pinned,undefined);
-  assert.equal(d.preferences({pinned:[]}).pinned,undefined);
-  assert.deepEqual(d.preferences({pinned:['week']}).pinned,['week']);
-  assert.deepEqual(d.preferences({pinned:['month','week','month']}).pinned,['month','week']);
-  assert.equal(d.preferences({pinned:['nope']}).pinned,undefined);
-  const prefs={...d.preferences(),pinned:['week','month']};
-  assert.deepEqual(d.validate({version:2,sessions:[hunt],preferences:prefs}).preferences.pinned,['week','month']);
-  assert.equal(d.validate({version:2,sessions:[hunt],preferences:{...prefs,pinned:[]}}).preferences.pinned,undefined);
-  // The pinned cards live in the profile, so they follow it into the backup.
-  const store=d.validateStore({version:3,activeProfile:'p1',profiles:[{id:'p1',name:'Knight',sessions:[hunt],preferences:prefs}]});
-  assert.deepEqual(store.profiles[0].preferences.pinned,['week','month']);
-});
 test('os periodos em andamento e o log das semanas e meses ficam no backup',()=>{
   const base={version:3,activeProfile:'p1',profiles:[{id:'p1',name:'Knight',sessions:[],preferences:{}}]};
   const store=d.validateStore({...base,periods:{week:'2026-10-19',month:'2026-10-01'},history:[
