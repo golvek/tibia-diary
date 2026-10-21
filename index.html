@@ -9,7 +9,6 @@
 <div class="toolbar"><input id="anchor" class="date-picker" type="date" required aria-label="Pick a day"><button type="button" id="day-button" class="range-open day-button" title="Pick a day"></button><div class="range-group"></div></div>
 <p class="paste-hint">Press <kbd>Ctrl</kbd>+<kbd>V</kbd> anywhere on this page to add a hunt.</p>
 <div id="sessions" class="cards"></div>
-<div id="pinned-totals" class="pinned-totals" hidden></div>
 
 </section>
 <section id="view-calendar" aria-label="Week and month" hidden><div class="view-head"><div class="range-toggle"><button type="button" id="range-week" class="active">Week</button><button type="button" id="range-month">Month</button></div><div class="range-head-right"><span id="range-label" class="muted"></span><button type="button" id="range-today" class="range-today" title="Go to the hunts of today">Today</button></div></div><div id="range-body"></div></section>
@@ -23,6 +22,7 @@
 <dialog id="statement-dialog"><div class="dialog-title"><h2 id="statement-title">Statement</h2><button data-close="statement-dialog" aria-label="Close statement">×</button></div><div id="statement-body" class="statement"></div></dialog>
 <dialog id="profile-dialog"><div class="dialog-title"><h2>Profiles</h2><button data-close="profile-dialog" aria-label="Close profiles">×</button></div><p class="muted">Each profile keeps its own hunts, fields and daily reset — use one per character.</p><div id="profile-list"></div></dialog>
 <dialog id="confirm-dialog"><h2 id="confirm-title"></h2><p id="confirm-description"></p><div class="dialog-actions"><button id="confirm-cancel">Cancel</button><button id="confirm-ok" class="primary">Confirm</button></div></dialog>
+<div id="pinned-totals" class="pinned-totals" hidden></div>
 <div id="trash" class="trash" aria-hidden="true"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg><span>Drop to delete</span></div>
 <div id="toast" role="status" hidden></div>
 </body></html>

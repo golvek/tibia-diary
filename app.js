@@ -372,7 +372,7 @@ function compact(value){
   if(n>=1e6)return sign+trim(n/1e6)+'kk';
   if(n>=1e4)return sign+Math.round(n/1e3)+'k';
   if(n>=1e3)return sign+trim(n/1e3)+'k';
-  return sign+number(value);
+  return sign+number(n);
 }
 // The detail window of a day: every hunt, every cost and the result.
 function statementMarkup(date){
@@ -486,17 +486,20 @@ function rangeViewMarkup(kind){
   const total=`<tr class="range-row total"><td class="col-date"><span class="range-total-label">${esc(totalLabel)}</span>${pinButton(kind)}</td><td class="col-xp">${summary.days?esc(number(summary.xp)):'—'}</td><td class="col-balance ${summary.balance>=0?'positive':'negative'}">${summary.days?esc(number(summary.balance)):'—'}</td></tr>`;
   return {label,html:`<div class="range-view"><div class="range-wrap"><table class="range-table"><thead><tr><th scope="col" class="col-date">Date</th><th scope="col" class="col-xp">Raw XP</th><th scope="col" class="col-balance">Balance</th></tr></thead><tbody>${rows.join('')}</tbody><tfoot>${total}</tfoot></table></div></div>`};
 }
-// The pinned totals stay at the bottom of the main screen, in one line each.
+// The pinned totals stay on the bottom bar of the screen, one line each.
 function renderPinnedTotals(){
   const pinned=Array.isArray(state.preferences.pinned)?state.preferences.pinned:[];
   const panel=$('pinned-totals');
   panel.hidden=!pinned.length;
   panel.innerHTML=pinned.map(kind=>{
     const s=periodSummary(kind);
-    const title=kind==='week'?'Week total':'Month total';
+    const title=kind==='week'?'week total':'month total';
     const sign=s.balance>=0?'positive':'negative';
-    return `<div class="pinned-total"><span class="pinned-total-label">${esc(title)}</span>${pinButton(kind)}<span class="pinned-total-xp">${s.days?esc(number(s.xp)):'—'}</span><span class="character-sep">|</span><span class="pinned-total-balance ${sign}">${s.days?esc(number(s.balance)):'—'}</span></div>`;
+    return `<div class="pinned-total"><span class="pinned-total-label">${esc(title)}</span><span class="pinned-total-xp">${s.days?esc(compact(s.xp)):'—'} xp</span><span class="character-sep">|</span><span class="pinned-total-balance ${sign}">${s.days?esc(compact(s.balance)):'—'}<span class="coin"></span></span>${pinButton(kind)}</div>`;
   }).join('');
+  // The bar is fixed on the bottom, so the page keeps room for it.
+  document.body.classList.toggle('has-pinned-bar',pinned.length>0);
+  document.body.style.paddingBottom=pinned.length?panel.offsetHeight+'px':'0px';
 }
 function renderRangeView(){
   const view=rangeViewMarkup(rangeKind);
