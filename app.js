@@ -507,7 +507,7 @@ function renderTabs(){
   const tabs=state.tabs||[];
   const active=state.activeTab||'';
   const all=`<button type="button" class="tab${active?'':' active'}" data-tab="">All</button>`;
-  const list=tabs.map(name=>`<button type="button" class="tab${active===name?' active':''}" data-tab="${esc(name)}" title="${esc(name)}">${esc(name)}</button>`).join('');
+  const list=tabs.map(name=>`<button type="button" class="tab${active===name?' active':''}" data-tab="${esc(name)}" title="${esc(name)} — double click to rename">${esc(name)}</button>`).join('');
   // The X on the right closes the tab in use, like the client window.
   const close=`<button type="button" class="tab-close" data-close-tab="×" title="${active?'Close the tab '+active:'Open a tab to close it'}" aria-label="Close the current tab"${active?'':' disabled'}>×</button>`;
   $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button>`+close;
@@ -570,6 +570,47 @@ $('tabs-bar').addEventListener('drop',e=>{
   for(const other of $('tabs-bar').querySelectorAll('.tab.over'))other.classList.remove('over');
   endDrag();
   if(id)moveSessionToTab(id,tab.dataset.tab);
+});
+// Two clicks on a tab rename it, like the profile name.
+function renameTab(oldName,newName){
+  const tabs=(state.tabs||[]).map(t=>t===oldName?newName:t);
+  // The hunts of the tab follow the new name, unless it was written by hand.
+  const sessions=state.sessions.map(s=>{
+    if(s.group!==oldName)return s;
+    const copy={...s};
+    copy.group=newName;
+    if(!s.name||s.name===oldName)copy.name=newName;
+    return copy;
+  });
+  const active=state.activeTab===oldName?newName:state.activeTab;
+  save({...state,tabs,sessions,activeTab:active});
+}
+function startRenameTab(name){
+  const button=[...$('tabs-bar').querySelectorAll('.tab[data-tab]')].find(t=>t.dataset.tab===name);
+  if(!button)return;
+  const input=document.createElement('input');
+  input.type='text';input.className='tab-rename-field';input.maxLength=40;input.value=name;
+  button.replaceWith(input);
+  input.focus();input.select();
+  let finished=false;
+  const finish=commit=>{
+    if(finished)return;
+    finished=true;
+    const clean=input.value.trim().slice(0,40);
+    if(commit&&clean&&clean!==name&&!(state.tabs||[]).includes(clean))renameTab(name,clean);
+    else renderTabs();
+  };
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();finish(true);}
+    else if(e.key==='Escape'){e.preventDefault();finish(false);}
+  });
+  input.addEventListener('blur',()=>finish(true));
+}
+$('tabs-bar').addEventListener('dblclick',e=>{
+  const tab=e.target.closest('.tab[data-tab]');
+  if(!tab||!tab.dataset.tab)return;
+  e.preventDefault();
+  startRenameTab(tab.dataset.tab);
 });
 // Closing a tab that still has hunts asks for confirmation.
 function closeTab(name){

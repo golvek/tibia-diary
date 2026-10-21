@@ -103,6 +103,8 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .tab-close:hover{color:#fff;background-color:#5a3a3a;filter:none}
 .tab-close:disabled{opacity:.35;cursor:default}
 .tab.over{color:#f2efe6;background-color:#5b5d64;box-shadow:inset 1px 1px #9d9fa7,inset -1px -1px #1a1b1e,0 0 0 2px var(--accent);filter:brightness(1.1);z-index:3}
+.tab-rename-field{font:inherit;font-size:14px;font-weight:bold;letter-spacing:.5px;color:var(--text);background:var(--inset);border:1px solid var(--shine);box-shadow:inset 1px 1px var(--shadow);padding:7px 12px;min-height:33px;min-width:120px}
+.tab-rename-field:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .tab-remove{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;font-size:15px;line-height:1;color:inherit;cursor:pointer;opacity:.6}
 .tab-remove:hover{color:var(--bad);opacity:1}
 .tab-remove:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
