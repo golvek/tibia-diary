@@ -60,7 +60,7 @@ function closeOnBackdrop(dialog,onClose){
     dialog.close();
   });
 }
-for(const id of ['detail-dialog','backup-dialog','week-dialog','month-dialog','statement-dialog','expense-dialog','profile-dialog','settings-dialog'])closeOnBackdrop($(id));
+for(const id of ['detail-dialog','backup-dialog','statement-dialog','expense-dialog','profile-dialog','settings-dialog'])closeOnBackdrop($(id));
 closeOnBackdrop($('confirm-dialog'),()=>{confirmAction=null;});
 function importAnalyzer(raw){
   if(!raw.trim()){status('Paste a complete report.',true);return;}
@@ -271,8 +271,9 @@ function sessionCard(s){
   const expenses=state.expenses.filter(e=>e.sessionId===s.id);
   const spent=expenses.reduce((n,e)=>n+e.amount,0);
   const net=(s.balance||0)-spent;
+  // The minimized box keeps the session, the raw XP and the balance, one per line.
   const rows=minimized
-    ? `<dt>Session:</dt><dd>${esc(reported)}</dd><dt>Balance:</dt><dd class="${color(net,'balance')}">${esc(number(net))}${moneyFields.has('balance')?coin:''}</dd>`
+    ? `<dt>Session:</dt><dd>${esc(reported)}</dd><dt>Raw XP:</dt><dd>${s.rawXp!=null?esc(number(s.rawXp)):'—'}</dd><dt>Balance:</dt><dd class="${color(net,'balance')}">${esc(number(net))}${moneyFields.has('balance')?coin:''}</dd>`
     : [`<dt>Session:</dt><dd>${esc(reported)}</dd>`].concat(numeric.map(f=>{
       const value=f.key==='balance'?net:s[f.key];
       return `<dt>${esc(f.label)}:</dt><dd class="${color(value,f.key)}">${esc(format(value,f))}${moneyFields.has(f.key)?coin:''}</dd>`;
@@ -373,55 +374,136 @@ function compact(value){
   if(n>=1e3)return sign+trim(n/1e3)+'k';
   return sign+number(value);
 }
-// Any range of days: each day shows only its date and the final balance.
-function rangeMarkup(range,totalLabel){
-  const sessions=state.sessions.filter(s=>{const d=day(s);return d>=range.start&&d<=range.end;});
-  const expenses=state.expenses.filter(e=>e.date>=range.start&&e.date<=range.end);
-  if(!sessions.length&&!expenses.length)return {html:'',count:0,total:0};
-  const days=[...new Set([...sessions.map(s=>day(s)),...expenses.map(e=>e.date)])].sort();
-  let total=0;
-  const html=days.map(date=>{
-    const analyzer=Diary.aggregate(sessions.filter(s=>day(s)===date)).balance||0;
-    const spent=expenses.filter(e=>e.date===date).reduce((n,e)=>n+e.amount,0);
-    const balance=analyzer-spent;
-    total+=balance;
-    const title=spent?`Analyzer ${number(analyzer)} − expenses ${number(spent)}`:`Balance ${number(balance)}`;
-    const current=date===state.preferences.anchor?' current':'';
-    return `<div class="range-day${current}"><button type="button" class="range-date" data-statement="${date}" title="Open the statement of this day">${dateLabel(date)}</button><span class="week-balance ${balance>=0?'positive':'negative'}" title="${esc(title)}">${esc(number(balance))}</span></div>`;
-  }).join('');
-  const totalRow=`<div class="week-total"><span>${esc(totalLabel)}</span><span class="${total>=0?'positive':'negative'}">${esc(number(total))}</span></div>`;
-  return {html:html+totalRow,count:sessions.length,total};
-}
-// The statement of a day: every analyzer, every extra cost, and the result.
+// The detail window of a day: every hunt, every cost and the result.
 function statementMarkup(date){
   const entries=state.sessions.filter(s=>day(s)===date).sort((a,b)=>(a.start||a.date).localeCompare(b.start||b.date));
   const expenses=state.expenses.filter(e=>e.date===date);
   if(!entries.length&&!expenses.length)return {html:'',total:0};
   let total=0,rawXp=0;
-  const rows=entries.map(s=>{
+  const cards=entries.map(s=>{
     const balance=s.balance||0;
     total+=balance;
     if(s.rawXp!=null)rawXp+=s.rawXp;
-    const xp=s.rawXp!=null?`<span class="st-xp">Raw XP ${esc(compact(s.rawXp))}</span>`:'<span class="st-xp"></span>';
-    // The costs of this hunt stay under it.
     const own=expenses.filter(e=>e.sessionId===s.id);
-    const costRows=own.map(e=>{
+    const net=balance-own.reduce((n,e)=>n+e.amount,0);
+    const stats=[
+      ['Raw XP',s.rawXp!=null?compact(s.rawXp):'—'],
+      ['XP Gain',number(s.xp||0)],
+      ['Loot',number(s.loot||0)],
+      ['Supplies',number(s.supplies||0)],
+      ['Time',duration(s.seconds||0)],
+    ].map(([label,value])=>`<div><span>${esc(label)}</span>${esc(value)}</div>`).join('');
+    const costs=own.map(e=>{
       total-=e.amount;
-      return `<div class="statement-row sub"><span class="st-name">${esc(e.label)}</span><span class="st-xp">Expense</span><span class="st-value ${e.amount>0?'negative':'positive'}">${e.amount>0?'−':'+'}${esc(number(Math.abs(e.amount)))}</span></div>`;
+      const {quantity,name}=Diary.parseLabel(e.label);
+      return `<div class="statement-cost"><span class="statement-cost-name">${esc(quantity>1?`${quantity}× ${name}`:name)}</span><span class="statement-cost-value ${e.amount>0?'negative':'positive'}">${e.amount>0?'−':'+'}${esc(number(Math.abs(e.amount)))}</span></div>`;
     }).join('');
-    return `<div class="statement-row"><span class="st-name">${esc(s.name||'Hunt Analyser')}</span>${xp}<span class="st-value ${balance>=0?'positive':'negative'}">${balance>=0?'+':'−'}${esc(number(Math.abs(balance)))}</span></div>${costRows}`;
+    // The time of the hunt is not shown here: the card has the duration already.
+    return `<article class="statement-card"><div class="statement-head"><h3>${esc(s.name||'Hunt Analyser')}</h3></div><div class="statement-grid">${stats}</div><div class="statement-balance"><span>Balance</span><span class="${net>=0?'positive':'negative'}">${esc(number(net))}</span></div>${costs?`<div class="statement-costs"><h4>Expenses</h4>${costs}</div>`:''}</article>`;
   }).join('');
-  // Costs that are not linked to a hunt still count for the day.
   const loose=expenses.filter(e=>!e.sessionId||!state.sessions.some(s=>s.id===e.sessionId));
-  const expenseRows=loose.map(e=>{
+  const looseRows=loose.map(e=>{
     total-=e.amount;
-    return `<div class="statement-row"><span class="st-name">${esc(e.label)}</span><span class="st-xp">Expense</span><span class="st-value ${e.amount>0?'negative':'positive'}">${e.amount>0?'−':'+'}${esc(number(Math.abs(e.amount)))}</span></div>`;
+    return `<div class="statement-cost"><span class="statement-cost-name">${esc(e.label)}</span><span class="statement-cost-value ${e.amount>0?'negative':'positive'}">${e.amount>0?'−':'+'}${esc(number(Math.abs(e.amount)))}</span></div>`;
   }).join('');
-  const totalRow=`<div class="statement-total"><span>Total</span><span class="${total>=0?'positive':'negative'}">${esc(number(total))}</span></div>`;
-  return {html:rows+expenseRows+totalRow,total};
+  const totalRow=`<div class="statement-total"><span>Day total</span><span class="statement-total-xp">Raw XP ${esc(compact(rawXp))}</span><span class="${total>=0?'positive':'negative'}">${esc(number(total))}</span></div>`;
+  return {html:cards+(looseRows?`<article class="statement-card"><div class="statement-costs"><h4>Other costs</h4>${looseRows}</div></article>`:'')+totalRow,total};
 }
-function weekMarkup(){return rangeMarkup(Diary.period('week',state.preferences.anchor),'Week total');}
-function monthMarkup(){return rangeMarkup(Diary.period('month',state.preferences.anchor),'Month total');}
+// The side panel with every day of the week or of the month.
+function daysInRange(range){
+  const days=[];
+  const end=new Date(range.end+'T12:00:00');
+  for(const start=new Date(range.start+'T12:00:00');start<=end;start.setDate(start.getDate()+1))days.push(Diary.today(start));
+  return days;
+}
+// The totals of the week or of the month: days, hunts, raw XP and balance.
+function periodSummary(kind){
+  const range=Diary.period(kind,state.preferences.anchor);
+  let xp=0,balance=0,hunts=0,days=0;
+  for(const date of daysInRange(range)){
+    const sessions=state.sessions.filter(s=>day(s)===date);
+    const spent=state.expenses.filter(e=>e.date===date).reduce((n,e)=>n+e.amount,0);
+    xp+=sessions.reduce((n,s)=>n+(s.rawXp||0),0);
+    balance+=(Diary.aggregate(sessions).balance||0)-spent;
+    if(sessions.length||spent){days++;hunts+=sessions.length;}
+  }
+  return {range,xp,balance,hunts,days,label:kind==='week'?`${shortDate(range.start)} – ${shortDate(range.end)}`:`${monthName(range.start)}`};
+}
+// The card with the totals of a period. It is used next to the table of the
+// calendar and pinned on the main screen.
+const PIN_SVG='<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="pin-fill" d="M6.3 1.6h3.4l-.5 3.3 2.3 2.3v1.2H4.5V7.2l2.3-2.3z"/><path d="M8 8.4v6"/></svg>';
+function isPinned(kind){return Array.isArray(state.preferences.pinned)&&state.preferences.pinned.includes(kind);}
+function summaryCard(kind){
+  const s=periodSummary(kind);
+  const title=kind==='week'?'Week total':'Month total';
+  const pinned=isPinned(kind);
+  // The pin inside the card fixes it on the main screen.
+  const pin=`<button type="button" class="range-pin" data-pin="${kind}" aria-pressed="${pinned}" title="${pinned?'Unpin this card from the main screen':'Pin this card on the main screen'}" aria-label="${pinned?'Unpin':'Pin'} ${title}">${PIN_SVG}</button>`;
+  return `<aside class="range-summary"><div class="range-summary-head"><h3 class="range-summary-title">${esc(title)}</h3>${pin}</div><p class="range-summary-period">${esc(s.label)}</p><dl class="range-summary-list">
+    <div class="range-summary-item"><dt>Raw XP</dt><dd>${s.days?esc(number(s.xp)):'—'}</dd></div>
+    <div class="range-summary-item total"><dt>Balance</dt><dd class="${s.balance>=0?'positive':'negative'}">${s.days?esc(number(s.balance)):'—'}</dd></div>
+  </dl></aside>`;
+}
+// Fixing a card on the main screen is done from the card itself.
+function togglePin(kind){
+  if(kind!=='week'&&kind!=='month')return;
+  const list=Array.isArray(state.preferences.pinned)?[...state.preferences.pinned]:[];
+  const next=list.includes(kind)?list.filter(k=>k!==kind):[...list,kind];
+  updatePrefs({pinned:next});
+}
+document.addEventListener('click',e=>{
+  const pin=e.target.closest('[data-pin]');
+  if(!pin)return;
+  e.stopPropagation();
+  togglePin(pin.dataset.pin);
+});
+// One table with the date, the raw XP and the balance of every day of the
+// week or of the month. The numbers are exact, so the days can be compared.
+function rangeViewMarkup(kind){
+  const range=Diary.period(kind,state.preferences.anchor);
+  const label=kind==='week'?`${shortDate(range.start)} – ${shortDate(range.end)}`:`${monthName(range.start)}`;
+  const today=Diary.currentDay(state.preferences.reset);
+  const cells=daysInRange(range).map(date=>{
+    const sessions=state.sessions.filter(s=>day(s)===date);
+    const spent=state.expenses.filter(e=>e.date===date).reduce((n,e)=>n+e.amount,0);
+    const hasXp=sessions.some(s=>s.rawXp!=null);
+    const rawXp=sessions.reduce((n,s)=>n+(s.rawXp||0),0);
+    const balance=(Diary.aggregate(sessions).balance||0)-spent;
+    const hunts=sessions.length;
+    const empty=!hunts&&!spent;
+    const xp=hasXp?esc(number(rawXp)):'—';
+    const bal=empty?'—':esc(number(balance));
+    const sign=empty?'blank':(balance>=0?'positive':'negative');
+    // The day of the day is the only one marked in the list.
+    const current=date===today?' current':'';
+    // The date is a real button, so the day can also be opened with the keyboard.
+    const dayCell=hunts
+      ? `<button type="button" class="range-link"><span class="range-weekday">${esc(weekdayLabel(date))}</span> ${esc(dateLabel(date))}</button>`
+      : `<span class="range-weekday">${esc(weekdayLabel(date))}</span> ${esc(dateLabel(date))}`;
+    const html=`<tr class="range-row${empty?' blank':''}${current}"${empty?'':` data-statement="${date}"`}><td class="col-date">${dayCell}</td><td class="col-xp">${xp}</td><td class="col-balance ${sign}">${bal}</td></tr>`;
+    return {date,empty,html};
+  });
+  // Every day of the period gets a line, so the month shows the whole month.
+  // The days without hunts stay thin and dim, and the ones with hunts stand out.
+  const rows=cells.map(cell=>cell.html);
+  // The summary sits next to the table, so the totals of the period are
+  // always on screen, even with a month full of days.
+  return {label,html:`<div class="range-view"><div class="range-wrap"><table class="range-table"><thead><tr><th scope="col" class="col-date">Date</th><th scope="col" class="col-xp">Raw XP</th><th scope="col" class="col-balance">Balance</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>${summaryCard(kind)}</div>`};
+}
+// The pinned cards stay on the main screen, next to the hunts of the day.
+function renderPinnedTotals(){
+  const pinned=Array.isArray(state.preferences.pinned)?state.preferences.pinned:[];
+  const panel=$('pinned-totals');
+  panel.hidden=!pinned.length;
+  panel.innerHTML=pinned.map(kind=>summaryCard(kind)).join('');
+}
+function renderRangeView(){
+  const view=rangeViewMarkup(rangeKind);
+  $('range-label').textContent=view.label;
+  $('range-body').innerHTML=view.html;
+  $('range-week').classList.toggle('active',rangeKind==='week');
+  $('range-month').classList.toggle('active',rangeKind==='month');
+}
 function render(){
   const prefs=state.preferences;
   $('anchor').value=prefs.anchor;$('daily-reset').value=prefs.reset;
@@ -430,14 +512,10 @@ function render(){
   // Oldest first, so the boxes read from left to right as the day happened.
   const sessions=state.sessions.filter(s=>day(s)===prefs.anchor).sort((a,b)=>(a.start||a.date).localeCompare(b.start||b.date));
   $('sessions').innerHTML=sessions.length?cardsMarkup(sessions):'<div class="empty">No hunts for this day. Paste a report above.</div>';
-  const weekRange=Diary.period('week',prefs.anchor),monthRange=Diary.period('month',prefs.anchor);
-  const week=weekMarkup(),month=monthMarkup();
-  $('week-list').innerHTML=week.html;
-  $('week-title').textContent=`${shortDate(weekRange.start)} – ${shortDate(weekRange.end)}`;
-  $('month-list').innerHTML=month.html;
-  $('month-title').textContent=monthName(monthRange.start);
   renderProfiles();
   renderCharacters();
+  renderRangeView();
+  renderPinnedTotals();
   renderBrand();
   // An open window shows the current numbers, not the ones it had when opened.
   if($('statement-dialog').open&&statementDate){
@@ -495,12 +573,17 @@ function renderCharacters(){
 }
 function showTab(name){
   $('view-hunts').hidden=name!=='hunts';
+  $('view-calendar').hidden=name!=='calendar';
   $('view-characters').hidden=name!=='characters';
   for(const tab of document.querySelectorAll('.side-tab'))tab.classList.toggle('active',tab.dataset.tab===name);
   if(name==='characters')renderCharacters();
+  if(name==='calendar')renderRangeView();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 for(const tab of document.querySelectorAll('.side-tab'))tab.onclick=()=>showTab(tab.dataset.tab);
+$('range-week').onclick=()=>{rangeKind='week';renderRangeView();};
+$('range-month').onclick=()=>{rangeKind='month';renderRangeView();};
+$('range-body').addEventListener('click',e=>{const row=e.target.closest('[data-statement]');if(row)openStatement(row.dataset.statement);});
 // The extra costs of a hunt, kept inside its box.
 let editingExpense=null,editingSession='';
 function openExpenseForm(id,sessionId){
@@ -573,10 +656,6 @@ $('sessions').addEventListener('keydown',e=>{
 function updatePrefs(patch){save({...state,preferences:{...state.preferences,...patch}});}
 $('field-checkboxes').addEventListener('change',()=>updatePrefs({visible:[...$('field-checkboxes').querySelectorAll('input:checked')].map(input=>input.value)}));
 $('reset-fields').onclick=()=>updatePrefs({visible:[...Diary.defaults]});
-$('week-list').addEventListener('click',e=>{const button=e.target.closest('[data-statement]');if(button){openStatement(button.dataset.statement);}});
-$('month-list').addEventListener('click',e=>{const button=e.target.closest('[data-statement]');if(button){openStatement(button.dataset.statement);}});
-$('week-open').onclick=()=>$('week-dialog').showModal();
-$('month-open').onclick=()=>$('month-dialog').showModal();
 function openStatement(date){
   statementDate=date;
   const statement=statementMarkup(date);
@@ -621,7 +700,7 @@ $('profile-list').addEventListener('click',e=>{
     confirm('Delete profile?',`"${profile.name}" and its ${profile.sessions.length} hunts will be removed. This cannot be undone.`,()=>deleteProfile(profile.id));
   }
 });
-function detail(id){const s=state.sessions.find(s=>s.id===id);if(!s)return;selectedId=id;$('detail-day').textContent=`Day ${dateLabel(day(s))} · Reset ${state.preferences.reset} · Based on session start`;$('detail-title').textContent=s.name||'Session on '+dateLabel(s.date);$('detail-name').value=s.name||'Hunt Analyser';$('detail-time').textContent=s.legacy?'Older manual entry. Time and additional fields were not recorded.':`${s.start.slice(11)} → ${dateLabel(s.end.slice(0,10))} ${s.end.slice(11)} · ${duration(s.seconds)} · Reported duration: ${Math.floor(s.reportedMinutes/60).toString().padStart(2,'0')}:${(s.reportedMinutes%60).toString().padStart(2,'0')}h${s.durationMismatch?' — the report states a different length than the header window':''}`;$('detail-values').innerHTML=totalsMarkup(s);$('detail-values').hidden=!$('detail-values').innerHTML;$('detail-lists').innerHTML=listMarkup(s);$('detail-raw').textContent=s.raw||`Character: ${s.character}\nNote: ${s.notes}\nTime: ${duration(s.seconds)}\nXP: ${s.xp}\nProfit: ${s.balance}`;$('detail-dialog').showModal();}
+function detail(id){const s=state.sessions.find(s=>s.id===id);if(!s)return;selectedId=id;$('detail-title').textContent=s.name||'Session on '+dateLabel(s.date);$('detail-name').value=s.name||'Hunt Analyser';$('detail-time').textContent=s.legacy?'Older manual entry. Time and additional fields were not recorded.':`${s.start.slice(11)} → ${dateLabel(s.end.slice(0,10))} ${s.end.slice(11)} · ${duration(s.seconds)} · Reported duration: ${Math.floor(s.reportedMinutes/60).toString().padStart(2,'0')}:${(s.reportedMinutes%60).toString().padStart(2,'0')}h${s.durationMismatch?' — the report states a different length than the header window':''}`;$('detail-values').innerHTML=totalsMarkup(s);$('detail-values').hidden=!$('detail-values').innerHTML;$('detail-lists').innerHTML=listMarkup(s);$('detail-raw').textContent=s.raw||`Character: ${s.character}\nNote: ${s.notes}\nTime: ${duration(s.seconds)}\nXP: ${s.xp}\nProfit: ${s.balance}`;$('detail-dialog').showModal();}
 // The name replaces the whole title, so "Hunt Analyser" can be dropped.
 function saveSessionName(id,value){
   const clean=String(value||'').trim().slice(0,60);
@@ -654,7 +733,7 @@ $('sessions').addEventListener('toggle',e=>{
   if(details.open)expandedSections.add(details.dataset.key);else expandedSections.delete(details.dataset.key);
 },true);
 // Drag a hunt to the trash to delete it.
-let draggedSession=null,statementDate=null;
+let draggedSession=null,statementDate=null,rangeKind='week';
 function endDrag(){
   document.body.classList.remove('dragging');
   for(const card of document.querySelectorAll('.analyser-card.dragging'))card.classList.remove('dragging');

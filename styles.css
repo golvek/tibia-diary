@@ -91,6 +91,64 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .profile-new:hover{color:var(--accent);filter:none}
 
 .range-open{min-height:42px;font-size:14px;padding:8px 14px}
+/* The week and month view: a table with the date, the raw XP and the balance,
+   next to the summary of the period. The columns are fixed, so the date stays
+   close to its numbers and every row lines up with the one above it. */
+.range-view{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
+.range-wrap{overflow-x:auto;border:1px solid var(--edge);box-shadow:1px 1px var(--shine);background:var(--inset)}
+.range-table{width:auto;border-collapse:collapse;table-layout:fixed;font-size:15px}
+.range-table th{background:none;box-shadow:none;text-align:left;font-size:12px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:0 12px 9px;border-bottom:1px solid var(--edge)}
+.range-table th.col-xp,.range-table th.col-balance{text-align:right}
+/* The columns are separated by a vertical line in every row. */
+.range-table th.col-xp,.range-table th.col-balance,.range-table td.col-xp,.range-table td.col-balance{border-left:1px solid var(--edge)}
+.range-table th.col-date{width:350px}
+.range-table th.col-xp{width:180px}
+.range-table th.col-balance{width:200px}
+.range-table td{padding:6px 12px;text-align:left;border-bottom:1px solid var(--edge);vertical-align:middle;font-size:15px}
+.range-table td.col-xp{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.range-table td.col-balance{text-align:right;font-variant-numeric:tabular-nums;font-weight:bold}
+.range-table td.col-balance.positive{color:var(--good)}
+.range-table td.col-balance.negative{color:var(--bad)}
+.range-table td.col-balance.blank{color:var(--muted);font-weight:normal}
+.range-table tbody tr:last-child td{border-bottom:1px solid var(--edge)}
+.range-table tbody tr:hover td{background:var(--hover)}
+.range-summary{background:var(--inset);border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shine),1px 1px var(--shine);padding:14px 16px}
+.range-summary-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.range-summary-title{margin:0;font-size:13px;font-weight:bold;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.range-summary-period{margin:2px 0 10px;font-size:13px;color:var(--muted)}
+.range-pin{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-height:28px;padding:0;background:none;border:0;box-shadow:none;color:var(--muted);cursor:pointer}
+.range-pin svg{width:14px;height:14px}
+.range-pin:hover{color:var(--accent);filter:none}
+.range-pin[aria-pressed=true]{color:var(--accent)}
+.range-pin .pin-fill{fill:none}
+.range-pin[aria-pressed=true] .pin-fill{fill:currentColor}
+.range-summary-list{margin:0;display:flex;flex-direction:column}
+.range-summary-item{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--edge)}
+.range-summary-item:last-child{border-bottom:0;padding-bottom:0}
+.range-summary-item dt{font-size:14px;color:var(--muted)}
+.range-summary-item dd{margin:0;font-size:19px;font-weight:bold;font-variant-numeric:tabular-nums;text-align:right}
+.range-summary-item.total dd{font-size:23px}
+.range-summary-item.total{border-bottom:0;padding-bottom:0}
+.range-row{cursor:pointer}
+.range-row.blank{cursor:default}
+.range-row.blank td{opacity:.5}
+.range-row.blank:hover td{background:none}
+.range-row.current td{background:rgba(196,202,212,.08)}
+.range-row.current td.col-date{box-shadow:inset 3px 0 0 var(--accent)}
+.range-weekday{font-weight:bold;color:var(--muted);margin-right:6px}
+.range-table td button.range-link{font:inherit;font-size:15px;font-weight:bold;text-align:left;background:none;border:0;box-shadow:none;padding:0;min-height:0;color:var(--text);cursor:pointer}
+.range-table td button.range-link:hover{color:var(--accent);filter:none}
+.range-row.current .range-link{color:var(--accent)}
+/* The pinned cards stay at the bottom of the main screen, under the hunts. */
+.pinned-totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0 0}
+@media(max-width:900px){.range-view{grid-template-columns:minmax(0,1fr)}.range-summary-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}.pinned-totals{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){.range-table th.col-xp{width:120px}.range-table th.col-balance{width:140px}.range-table th{padding:0 8px 7px}.range-table td{padding:8px}.range-table td,.range-table td button.range-link{font-size:14px}.range-weekday{margin-right:4px}.range-summary-list{grid-template-columns:minmax(0,1fr)}}
+#view-calendar{border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shine),inset -1px -1px var(--shadow);background:var(--panel);max-width:1320px;margin:24px auto;padding:0 18px 18px}
+.view-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 0 6px}
+.range-toggle{display:flex}
+.range-toggle button{font-size:14px;padding:7px 14px;min-height:38px;margin-left:-1px;background:none}
+.range-toggle button:first-child{margin-left:0}
+.range-toggle button.active{background:linear-gradient(var(--button-top),var(--button-bottom));color:var(--accent);position:relative}
 .side-menu{position:fixed;left:0;top:0;bottom:0;width:52px;z-index:30;background:var(--panel);border-right:1px solid var(--edge);box-shadow:1px 0 var(--shine);display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0}
 .side-tab{width:40px;min-height:40px;padding:0;display:flex;align-items:center;justify-content:center;background:none;border:1px solid transparent;color:var(--muted)}
 .side-tab svg{display:block}
@@ -134,6 +192,26 @@ body{padding-left:52px}
 .range-day .week-balance.negative{color:var(--bad)}
 .range-day .week-balance.positive{color:var(--good)}
 .statement{display:flex;flex-direction:column}
+.statement-card{border:1px solid var(--an-line);background:rgba(0,0,0,.14);padding:12px 14px;margin:0 0 10px}
+.statement-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.statement-head h3{margin:0;font-size:15px;color:var(--an-title,#d6dae1)}
+.statement-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px 16px;margin:10px 0}
+.statement-grid div{font-size:14px;font-variant-numeric:tabular-nums}
+.statement-grid span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.statement-balance{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-top:8px;border-top:1px solid var(--an-line);font-size:15px;font-weight:bold}
+.statement-balance span:first-child{color:var(--muted);font-size:13px;font-weight:normal}
+.statement-costs{margin-top:10px;padding-top:8px;border-top:1px dashed var(--an-line)}
+.statement-costs h4{margin:0 0 6px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:normal}
+.statement-cost{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:3px 0;font-size:14px}
+.statement-cost-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.statement-cost-value{font-variant-numeric:tabular-nums;white-space:nowrap}
+.statement-cost-value.negative{color:var(--bad)}
+.statement-cost-value.positive{color:var(--good)}
+.statement-total{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:baseline;padding:10px 0 0;margin-top:4px;border-top:2px solid var(--edge);font-size:16px;font-weight:bold}
+.statement-total span:first-child{color:var(--muted);font-size:14px;font-weight:normal}
+.statement-total-xp{color:var(--muted);font-size:14px;font-weight:normal;font-variant-numeric:tabular-nums}
+.statement-total .positive{color:var(--good)}
+.statement-total .negative{color:var(--bad)}
 .statement-row{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--edge)}
 .statement-row .st-name{font-size:15px;overflow-wrap:anywhere}
 .statement-row.sub{padding-left:16px}
@@ -172,7 +250,8 @@ body{padding-left:52px}
 .analyser-card .card-report{background:none;border:0;padding:0;width:18px;height:16px;min-height:16px;display:flex;align-items:center;justify-content:center;line-height:0;color:var(--an-label);cursor:pointer;text-shadow:none}
 .analyser-card .card-report:hover{color:var(--an-title);filter:none}
 .analyser-card .card-minimize:hover{color:var(--an-title);filter:none}
-.analyser-card.minimized dl{grid-template-columns:1fr auto}
+/* Minimized: the session, the raw XP and the balance, one per line. */
+.analyser-card.minimized dl{gap:2px 14px}
 .analyser-card .card-rename:hover{opacity:1;filter:brightness(1.2)}
 
 .analyser-card .card-time{margin:0;padding:7px 10px 0;font-size:13px;font-family:Verdana,Tahoma,Arial,sans-serif;color:var(--an-label)}

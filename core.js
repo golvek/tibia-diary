@@ -165,7 +165,13 @@
       // An empty selection is valid; a selection of unknown fields is not.
       visible=filtered.length?filtered:(source.visible.length?[...defaults]:[]);
     }
-    return {visible,period:PERIODS.includes(source.period)?source.period:'day',anchor:validDate(source.anchor)?source.anchor:currentDay(reset),reset};
+    const result={visible,period:PERIODS.includes(source.period)?source.period:'day',anchor:validDate(source.anchor)?source.anchor:currentDay(reset),reset};
+    // The week and month cards can be pinned on the main screen.
+    if(Array.isArray(source.pinned)) {
+      const list=[...new Set(source.pinned.filter(k=>k==='week'||k==='month'))];
+      if(list.length)result.pinned=list;
+    }
+    return result;
   }
 
   function validate(data) {
