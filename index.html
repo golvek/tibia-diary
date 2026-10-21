@@ -8,8 +8,10 @@
 <section id="view-hunts" aria-labelledby="history-title"><h1 id="history-title" class="sr-only">Daily hunts</h1>
 <div class="toolbar"><input id="anchor" class="date-picker" type="date" required aria-label="Pick a day"><button type="button" id="day-button" class="range-open day-button" title="Pick a day"></button><div class="range-group"></div></div>
 <div id="tabs-bar" class="tabs-bar" role="tablist" aria-label="Hunt tabs"></div>
+<div class="tab-content">
 <p class="paste-hint">Press <kbd>Ctrl</kbd>+<kbd>V</kbd> anywhere on this page to add a hunt.</p>
 <div id="sessions" class="cards"></div>
+</div>
 
 </section>
 <section id="view-calendar" aria-label="Week and month" hidden><div class="view-head"><div class="range-toggle"><button type="button" id="range-week" class="active">Week</button><button type="button" id="range-month">Month</button></div><div class="range-head-right"><span id="range-label" class="muted"></span><button type="button" id="range-today" class="range-today" title="Go to the hunts of today">Today</button></div></div><div id="range-body"></div></section>
