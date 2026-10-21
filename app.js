@@ -467,16 +467,30 @@ function rangeViewMarkup(kind){
 // The totals of the week and the month, on the bar at the bottom of the screen.
 function renderTotalsBar(){
   const panel=$('totals-bar');
-  panel.innerHTML=['week'].map(kind=>{
-    const s=periodSummary(kind);
-    const title=kind==='week'?'week total':'month total';
-    const sign=s.balance>=0?'positive':'negative';
-    return `<div class="bar-total"><span class="bar-label">${esc(title)}</span><span class="bar-xp">${s.days?esc(compact(s.xp)):'—'} xp</span><span class="bar-sep">|</span><span class="bar-balance ${sign}">${s.days?esc(compact(s.balance)):'—'}<span class="coin"></span></span></div>`;
-  }).join('');
+  const today=profileToday(currentProfile());
+  const from=(store.periods&&store.periods.week)||Diary.period('week',today).start;
+  const totals=storePeriodTotals(from,today);
+  // On the left: the photo of every character and the sum of their balances.
+  const faces=store.profiles.map(profile=>{
+    const current=profile.id===store.activeProfile;
+    const photo=profile.photo?`<img class="bar-face-img" src="${esc(profile.photo)}" alt="">`:'';
+    const initial=esc((profile.name||'?').trim().charAt(0).toUpperCase());
+    return `<span class="bar-face${current?' current':''}" data-profile="${esc(profile.id)}" title="${current?'Current profile':esc(profile.name)}">${photo||`<span class="bar-face-initial">${initial}</span>`}</span>`;
+  }).join('<span class="bar-op">+</span>');
+  const characters=faces?`<div class="bar-characters">${faces}<span class="bar-op">=</span><span class="bar-balance ${totals.total>=0?'positive':'negative'}">${esc(compact(totals.total))}<span class="coin"></span></span></div>`:'';
+  const s=periodSummary('week');
+  const sign=s.balance>=0?'positive':'negative';
+  const week=`<div class="bar-total"><span class="bar-label">week total</span><span class="bar-xp">${s.days?esc(compact(s.xp)):'—'} xp</span><span class="bar-sep">|</span><span class="bar-balance ${sign}">${s.days?esc(compact(s.balance)):'—'}<span class="coin"></span></span></div>`;
+  panel.innerHTML=characters+week;
   // The bar is fixed on the bottom, so the page keeps room for it.
   document.body.classList.add('has-totals-bar');
   document.body.style.paddingBottom=panel.offsetHeight+'px';
 }
+// Clicking a photo on the bar switches to that character.
+$('totals-bar').addEventListener('click',e=>{
+  const face=e.target.closest('[data-profile]');
+  if(face)switchProfile(face.dataset.profile);
+});
 function renderRangeView(){
   const view=rangeViewMarkup(rangeKind);
   $('range-label').textContent=view.label;
