@@ -559,17 +559,19 @@ function startBrandRename(){
 $('brand').onclick=()=>startBrandRename();
 // The profit of every profile, with the extra costs already deducted.
 function renderCharacters(){
-  let total=0;
+  let total=0,totalXp=0;
   const rows=store.profiles.map(profile=>{
     const balance=Diary.aggregate(profile.sessions).balance||0;
     const spent=(profile.expenses||[]).reduce((n,e)=>n+e.amount,0);
     const profit=balance-spent;
-    total+=profit;
+    const hunts=profile.sessions.length;
+    const rawXp=profile.sessions.reduce((n,s)=>n+(s.rawXp||0),0);
+    total+=profit;totalXp+=rawXp;
     const current=profile.id===store.activeProfile;
-    return `<div class="character-row${current?' current':''}"><span class="character-name">${esc(profile.name)}</span><span class="character-profit ${profit>=0?'positive':'negative'}">${esc(number(profit))}</span></div>`;
+    return `<div class="character-row${current?' current':''}"><span class="character-name">${esc(profile.name)}</span><span class="character-xp">${hunts?esc(number(rawXp)):'—'}</span><span class="character-profit ${profit>=0?'positive':'negative'}">${esc(number(profit))}</span></div>`;
   }).join('');
-  $('character-list').innerHTML=rows;
-  $('character-total').innerHTML=`<span>All characters</span><span class="character-profit ${total>=0?'positive':'negative'}">${esc(number(total))}</span>`;
+  $('character-list').innerHTML=`<div class="character-head"><span>Character</span><span>Raw XP</span><span>Profit</span></div>${rows}`;
+  $('character-total').innerHTML=`<span>All characters</span><span class="character-total-xp">${esc(number(totalXp))}</span><span class="character-profit ${total>=0?'positive':'negative'}">${esc(number(total))}</span>`;
 }
 function showTab(name){
   $('view-hunts').hidden=name!=='hunts';

@@ -176,16 +176,23 @@ body{padding-left:52px}
 .section-head{padding:14px 0 10px}
 .section-head h1{font-size:20px;margin:0 0 4px}
 #character-list{display:flex;flex-direction:column}
-.character-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:11px 2px;border-bottom:1px solid var(--edge)}
+.character-head{display:grid;grid-template-columns:1fr 190px 200px;gap:14px;align-items:baseline;padding:0 2px 8px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--edge)}
+.character-head span:nth-child(2),.character-head span:nth-child(3){text-align:right}
+.character-row{display:grid;grid-template-columns:1fr 190px 200px;gap:14px;align-items:baseline;padding:11px 2px;border-bottom:1px solid var(--edge)}
 .character-row:last-child{border-bottom:0}
-.character-row .character-name{font-size:16px;font-weight:bold;flex:1}
+.character-row .character-name{font-size:16px;font-weight:bold}
 .character-row.current .character-name{color:var(--accent)}
-.character-row .character-profit{font-size:17px;font-weight:bold;font-variant-numeric:tabular-nums;opacity:.55}
+.character-row .character-xp{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.character-row .character-profit{text-align:right;font-size:17px;font-weight:bold;font-variant-numeric:tabular-nums}
 .character-row .character-profit.positive{color:var(--good)}
 .character-row .character-profit.negative{color:var(--bad)}
-#character-total{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:13px 2px 0;margin-top:4px;border-top:2px solid var(--edge);font-size:17px;font-weight:bold}
+#character-total{display:grid;grid-template-columns:1fr 190px 200px;gap:14px;align-items:baseline;padding:13px 2px 0;margin-top:4px;border-top:2px solid var(--edge);font-size:17px;font-weight:bold}
+#character-total .character-total-xp{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+#character-total .character-profit{text-align:right;font-variant-numeric:tabular-nums;opacity:1}
+#character-total .character-profit.positive{color:var(--good)}
+#character-total .character-profit.negative{color:var(--bad)}
 #character-total .character-profit{font-variant-numeric:tabular-nums;opacity:1}
-@media(max-width:650px){.side-menu{width:44px}.side-tab{width:34px;min-height:34px}body{padding-left:44px}}
+@media(max-width:650px){.side-menu{width:44px}.side-tab{width:34px;min-height:34px}body{padding-left:44px}.character-head,.character-row,#character-total{grid-template-columns:1fr 110px 120px;gap:8px}}
 #week-list:empty::after,#month-list:empty::after{content:"Nothing recorded in this period.";color:var(--muted);font-size:14px}
 .range-list{display:flex;flex-direction:column}
 .range-day{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--edge)}

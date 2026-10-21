@@ -87,8 +87,9 @@ As janelas e as caixas usam a mesma skin do client do Tibia: textura de pedra (r
 
 ## Menu lateral
 
-A barra fixa na esquerda tem duas abas: **caças** (a tela principal) e **personagens**, e o **backup** no rodão dela.
-que soma o profit de todos os perfis — cada character com suas caçadas, seu Raw XP e o
+A barra fixa na esquerda tem tres abas, nesta ordem: **caças** (a tela principal), **semana e mes** e **personagens**, com os **ajustes** (engrenagem) logo abaixo e o **backup** no rodão dela.
+
+A aba **personagens** soma o profit de todos os perfis: cada character com o seu **Raw XP** e o
 profit ja com as despesas descontadas, e o total geral no rodape.
 
 ## Despesas extras
