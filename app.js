@@ -530,6 +530,45 @@ function removeTab(name){
   });
   save({...state,tabs,sessions,activeTab:state.activeTab===name?'':state.activeTab});
 }
+// Dragging a hunt to another tab moves it there.
+function moveSessionToTab(id,name){
+  const session=state.sessions.find(s=>s.id===id);
+  if(!session)return;
+  const old=session.group||'';
+  if(old===name)return;
+  // The name follows the tab, unless it was written by hand.
+  const autoNamed=!session.name||session.name===old;
+  const sessions=state.sessions.map(s=>{
+    if(s.id!==id)return s;
+    const copy={...s};
+    if(name){copy.group=name;if(autoNamed)copy.name=name;}
+    else delete copy.group;
+    return copy;
+  });
+  save({...state,sessions});
+}
+$('tabs-bar').addEventListener('dragover',e=>{
+  const tab=e.target.closest('[data-tab]');
+  if(!tab||!draggedSession)return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  for(const other of $('tabs-bar').querySelectorAll('.tab.over'))other.classList.remove('over');
+  tab.classList.add('over');
+});
+$('tabs-bar').addEventListener('dragleave',e=>{
+  const tab=e.target.closest('[data-tab]');
+  if(tab)tab.classList.remove('over');
+});
+$('tabs-bar').addEventListener('drop',e=>{
+  const tab=e.target.closest('[data-tab]');
+  if(!tab)return;
+  e.preventDefault();
+  e.stopPropagation();
+  const id=e.dataTransfer.getData('text/plain')||draggedSession;
+  for(const other of $('tabs-bar').querySelectorAll('.tab.over'))other.classList.remove('over');
+  endDrag();
+  if(id)moveSessionToTab(id,tab.dataset.tab);
+});
 $('tabs-bar').addEventListener('click',e=>{
   const remove=e.target.closest('[data-remove-tab]');
   if(remove){e.stopPropagation();removeTab(remove.dataset.removeTab);return;}

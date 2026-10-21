@@ -36,7 +36,9 @@ na branch `main`.
    caça (`cave rat`, `dragons`...). O `+` cria uma tab nova. Com a tab em uso, o report colado
    entra nela e o analyzer **já fica com o nome da tab** — não precisa renomear um por um. A
    tab `All` mostra todas as caçadas do dia; as outras mostram só as delas. O `×` apaga a tab
-   (as caçadas dela continuam guardadas, só perdem o vinculo com a tab).
+   (as caçadas dela continuam guardadas, só perdem o vinculo com a tab). Uma caçada também pode
+   ser **arrastada para outra tab**, que ela passa a pertencer (e o nome acompanha, a nao ser que
+   tenha sido escrito a mao).
 2. **Cada caçada vira uma caixa**, com os números do report, as moedas, o `Balance` em
    verde e as seções `Killed Monsters` / `Looted Items`.
 3. **Você pode colar quantas caçadas quiser.** As caixas do dia selecionado ficam na tela.
