@@ -571,10 +571,19 @@ $('tabs-bar').addEventListener('drop',e=>{
   endDrag();
   if(id)moveSessionToTab(id,tab.dataset.tab);
 });
+// Closing a tab that still has hunts asks for confirmation.
+function closeTab(name){
+  const hunts=state.sessions.filter(s=>s.group===name).length;
+  if(hunts){
+    confirm('Close the tab?',`"${name}" has ${hunts===1?'1 hunt':hunts+' hunts'}. The hunts stay saved, they just leave the tab.`,()=>removeTab(name));
+    return;
+  }
+  removeTab(name);
+}
 $('tabs-bar').addEventListener('click',e=>{
   const close=e.target.closest('[data-close-tab]');
   if(close){
-    if(state.activeTab)removeTab(state.activeTab);
+    if(state.activeTab)closeTab(state.activeTab);
     return;
   }
   const add=e.target.closest('[data-new-tab]');

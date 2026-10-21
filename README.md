@@ -35,7 +35,7 @@ na branch `main`.
    **Tabs de hunt:** a aba `Daily hunts` tem uma fileira de tabs com o nome de cada tipo de
    caça (`cave rat`, `dragons`...). O `+` cria uma tab nova. Com a tab em uso, o report colado
    entra nela e o analyzer **já fica com o nome da tab** — não precisa renomear um por um. A
-   tab `All` mostra todas as caçadas do dia; as outras mostram só as delas. O **X** no canto direito da faixa (como o botao de fechar do client) fecha a tab em uso — as caçadas dela continuam guardadas, só perdem o vinculo com a tab. Uma caçada também pode
+   tab `All` mostra todas as caçadas do dia; as outras mostram só as delas. O **X** no canto direito da faixa (como o botao de fechar do client) fecha a tab em uso — se ela ainda tem caçadas, aparece uma **confirmação** com quantas são. As caçadas continuam guardadas, só perdem o vinculo com a tab. Uma caçada também pode
    ser **arrastada para outra tab**, que ela passa a pertencer (e o nome acompanha, a nao ser que
    tenha sido escrito a mao).
 2. **Cada caçada vira uma caixa**, com os números do report, as moedas, o `Balance` em
