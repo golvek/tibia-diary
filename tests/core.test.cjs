@@ -126,6 +126,30 @@ test('os cards fixados na tela principal ficam salvos no backup',()=>{
   const store=d.validateStore({version:3,activeProfile:'p1',profiles:[{id:'p1',name:'Knight',sessions:[hunt],preferences:prefs}]});
   assert.deepEqual(store.profiles[0].preferences.pinned,['week','month']);
 });
+test('os periodos em andamento e o log das semanas e meses ficam no backup',()=>{
+  const base={version:3,activeProfile:'p1',profiles:[{id:'p1',name:'Knight',sessions:[],preferences:{}}]};
+  const store=d.validateStore({...base,periods:{week:'2026-10-19',month:'2026-10-01'},history:[
+    {kind:'week',from:'2026-10-12',to:'2026-10-18',xp:1000,total:500},
+    {kind:'month',from:'2026-09-01',to:'2026-09-30',xp:9000,total:4000}
+  ]});
+  assert.deepEqual(store.periods,{week:'2026-10-19',month:'2026-10-01'});
+  assert.equal(store.history.length,2);
+  assert.equal(store.history[0].kind,'week');
+  assert.equal(store.history[0].total,500);
+  assert.equal(store.history[1].kind,'month');
+  assert.equal(store.history[1].xp,9000);
+  // O backup volta igual depois de validar.
+  assert.deepEqual(d.validateStore(store).history,store.history);
+  // Um periodo invalido e ignorado: o total comeca de novo, sem perder o backup.
+  assert.equal(d.validateStore({...base,periods:{week:'2026-13-01',month:'2026-10-01'}}).periods,undefined);
+  // O log invalido e recusado.
+  assert.throws(()=>d.validateStore({...base,history:[{kind:'week',from:'2026-10-12',to:'2026-10-11',total:1}]}));
+  assert.throws(()=>d.validateStore({...base,history:[{kind:'week',from:'2026-10-12',to:'2026-10-18',total:1.5}]}));
+  // Um backup antigo continua valendo, sem periodos nem log.
+  const old=d.validateStore(base);
+  assert.equal(old.periods,undefined);
+  assert.equal(old.history,undefined);
+});
 test('resumos ignoram sessões sem tempo e períodos inválidos são rejeitados',()=>{
   assert.equal(d.aggregate([{xp:100,seconds:0}]).xpRate,null);
   assert.equal(d.aggregate([{xp:100}]).xpRate,null);

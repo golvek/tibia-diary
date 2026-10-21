@@ -28,7 +28,7 @@ function readStore(){
   if(!raw)return {version:3,activeProfile:'default',profiles:[{id:'default',name:'Profile 1',created:Diary.today(),sessions:[],preferences:Diary.preferences()}]};
   return Diary.validateStore(JSON.parse(raw));
 }
-try{store=readStore();applyProfile(currentProfile());writeStore();}
+try{store=readStore();rollPeriods();applyProfile(currentProfile());writeStore();}
 catch{blocked=true;warning('Saved data could not be read. Restore a valid backup to continue.');}
 function writeStore(){
   try{localStorage.setItem(KEY,JSON.stringify(store));return true;}
@@ -505,6 +505,8 @@ function renderRangeView(){
   $('range-month').classList.toggle('active',rangeKind==='month');
 }
 function render(){
+  // The week and the month turn over on their own, following the daily reset.
+  if(rollPeriods())writeStore();
   const prefs=state.preferences;
   $('anchor').value=prefs.anchor;$('daily-reset').value=prefs.reset;
   $('day-button').textContent=`${weekdayLabel(prefs.anchor)} ${dateLabel(prefs.anchor)}`;
@@ -557,21 +559,103 @@ function startBrandRename(){
   input.addEventListener('blur',()=>finish(true));
 }
 $('brand').onclick=()=>startBrandRename();
+// The day of today for a profile, following its own daily reset.
+function profileToday(profile){
+  const reset=profile&&profile.preferences?profile.preferences.reset:'00:00';
+  return Diary.currentDay(reset);
+}
+const dayBefore=date=>{const d=new Date(date+'T12:00:00');d.setDate(d.getDate()-1);return Diary.today(d);};
+// The totals of one profile inside a period: the raw XP and the balance of the
+// hunts of that period, with the extra costs deducted.
+function profilePeriodTotals(profile,from,to){
+  const reset=profile.preferences?profile.preferences.reset:'00:00';
+  const sessions=profile.sessions.filter(s=>{
+    const d=Diary.sessionDay(s,reset);
+    return d>=from&&d<=to;
+  });
+  const balance=Diary.aggregate(sessions).balance||0;
+  const spent=(profile.expenses||[]).filter(e=>e.date>=from&&e.date<=to).reduce((n,e)=>n+e.amount,0);
+  return {hunts:sessions.length,xp:sessions.reduce((n,s)=>n+(s.rawXp||0),0),profit:balance-spent};
+}
+// The sum of every profile in a period: the log of a closed period.
+function storePeriodTotals(from,to){
+  let xp=0,total=0;
+  for(const profile of store.profiles){
+    const t=profilePeriodTotals(profile,from,to);
+    xp+=t.xp;total+=t.profit;
+  }
+  return {xp,total};
+}
+// A closed period goes to the log, with the sum of every profile.
+function archivePeriod(kind,from,to){
+  if(!from||to<from)return;
+  const totals=storePeriodTotals(from,to);
+  store.history=[{kind,from,to,xp:totals.xp,total:totals.total},...(store.history||[])];
+  if(store.history.length>240)store.history.length=240;
+}
+// When the week or the month turns over, the closed period goes to the log and
+// the totals start again. The daily reset of the profile decides the day.
+function rollPeriods(){
+  const today=profileToday(currentProfile());
+  let changed=false;
+  store.periods=store.periods||{};
+  for(const kind of ['week','month']){
+    const start=Diary.period(kind,today).start;
+    const from=store.periods[kind];
+    if(!from){store.periods[kind]=start;changed=true;continue;}
+    if(from>=start)continue;//the period in progress is still open
+    archivePeriod(kind,from,dayBefore(start));
+    store.periods[kind]=start;
+    changed=true;
+  }
+  return changed;
+}
+// The user can close a period by hand: the totals start again from today.
+function resetPeriod(kind){
+  const today=profileToday(currentProfile());
+  const from=store.periods&&store.periods[kind];
+  const last=dayBefore(today);
+  if(from&&last>=from)archivePeriod(kind,from,last);
+  store.periods=store.periods||{};
+  store.periods[kind]=today;
+  writeStore();
+  render();
+}
+// The characters view: the period in progress and the log of the closed ones.
+$('character-week').onclick=()=>{characterKind='week';renderCharacters();};
+$('character-month').onclick=()=>{characterKind='month';renderCharacters();};
+$('character-reset').onclick=()=>{
+  const kind=characterKind;
+  confirm(`Reset the ${kind} total?`,'The totals start again from today and the closed period goes to the log.',()=>resetPeriod(kind));
+};
 // The profit of every profile, with the extra costs already deducted.
 function renderCharacters(){
+  const kind=characterKind;
+  const today=profileToday(currentProfile());
+  const from=(store.periods&&store.periods[kind])||Diary.period(kind,today).start;
   let total=0,totalXp=0;
   const rows=store.profiles.map(profile=>{
-    const balance=Diary.aggregate(profile.sessions).balance||0;
-    const spent=(profile.expenses||[]).reduce((n,e)=>n+e.amount,0);
-    const profit=balance-spent;
-    const hunts=profile.sessions.length;
-    const rawXp=profile.sessions.reduce((n,s)=>n+(s.rawXp||0),0);
-    total+=profit;totalXp+=rawXp;
+    const t=profilePeriodTotals(profile,from,today);
+    total+=t.profit;totalXp+=t.xp;
     const current=profile.id===store.activeProfile;
-    return `<div class="character-row${current?' current':''}"><span class="character-name">${esc(profile.name)}</span><span class="character-xp">${hunts?esc(number(rawXp)):'—'}</span><span class="character-profit ${profit>=0?'positive':'negative'}">${esc(number(profit))}</span></div>`;
+    return `<div class="character-row${current?' current':''}"><span class="character-name">${esc(profile.name)}</span><span class="character-xp">${t.hunts?esc(number(t.xp)):'—'}</span><span class="character-profit ${t.profit>=0?'positive':'negative'}">${esc(number(t.profit))}</span></div>`;
   }).join('');
   $('character-list').innerHTML=`<div class="character-head"><span>Character</span><span>Raw XP</span><span>Profit</span></div>${rows}`;
   $('character-total').innerHTML=`<span>All characters</span><span class="character-total-xp">${esc(number(totalXp))}</span><span class="character-profit ${total>=0?'positive':'negative'}">${esc(number(total))}</span>`;
+  $('character-week').classList.toggle('active',kind==='week');
+  $('character-month').classList.toggle('active',kind==='month');
+  $('character-range').textContent=kind==='week'?`${shortDate(from)} – ${shortDate(Diary.period('week',today).end)}`:`${monthName(from)}`;
+  $('character-reset').textContent=kind==='week'?'Reset week':'Reset month';
+  $('character-reset').title=`Start the ${kind} totals again from today. The closed period goes to the log.`;
+  // The log of the periods already closed.
+  const history=store.history||[];
+  $('character-history').innerHTML=history.length
+    ? `<h3 class="history-title">Log</h3>${history.map(entry=>{
+      const label=entry.kind==='month'?monthName(entry.from):`${shortDate(entry.from)} – ${shortDate(entry.to)}`;
+      const name=entry.kind==='month'?'Month':'Week';
+      return `<div class="history-row"><span class="history-kind">${name}</span><span class="history-range">${esc(label)}</span><span class="history-total ${entry.total>=0?'positive':'negative'}">${esc(number(entry.total))}</span></div>`;
+    }).join('')}`
+    : '<p class="muted">No closed period yet.</p>';
 }
 function showTab(name){
   $('view-hunts').hidden=name!=='hunts';
@@ -740,7 +824,7 @@ $('sessions').addEventListener('toggle',e=>{
   if(details.open)expandedSections.add(details.dataset.key);else expandedSections.delete(details.dataset.key);
 },true);
 // Drag a hunt to the trash to delete it.
-let draggedSession=null,statementDate=null,rangeKind='week';
+let draggedSession=null,statementDate=null,rangeKind='week',characterKind='week';
 function endDrag(){
   document.body.classList.remove('dragging');
   for(const card of document.querySelectorAll('.analyser-card.dragging'))card.classList.remove('dragging');

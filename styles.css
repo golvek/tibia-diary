@@ -175,6 +175,17 @@ body{padding-left:52px}
 #view-characters{border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shine),inset -1px -1px var(--shadow);background:var(--panel);padding:0 18px 18px}
 .section-head{padding:14px 0 10px}
 .section-head h1{font-size:20px;margin:0 0 4px}
+.character-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:0 0 12px}
+.character-bar-right{display:flex;align-items:center;gap:12px}
+#character-reset{min-height:0;font-size:13px;font-weight:normal;padding:6px 12px}
+.history-title{margin:22px 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.history-row{display:grid;grid-template-columns:70px 1fr auto;gap:14px;align-items:baseline;padding:8px 2px;border-bottom:1px solid var(--edge)}
+.history-row:last-child{border-bottom:0}
+.history-kind{font-size:13px;color:var(--muted)}
+.history-range{font-size:15px}
+.history-total{font-size:17px;font-weight:bold;font-variant-numeric:tabular-nums;text-align:right}
+.history-total.positive{color:var(--good)}
+.history-total.negative{color:var(--bad)}
 #character-list{display:flex;flex-direction:column}
 .character-head{display:grid;grid-template-columns:1fr 190px 200px;gap:14px;align-items:baseline;padding:0 2px 8px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--edge)}
 .character-head span:nth-child(2),.character-head span:nth-child(3){text-align:right}
@@ -192,7 +203,7 @@ body{padding-left:52px}
 #character-total .character-profit.positive{color:var(--good)}
 #character-total .character-profit.negative{color:var(--bad)}
 #character-total .character-profit{font-variant-numeric:tabular-nums;opacity:1}
-@media(max-width:650px){.side-menu{width:44px}.side-tab{width:34px;min-height:34px}body{padding-left:44px}.character-head,.character-row,#character-total{grid-template-columns:1fr 110px 120px;gap:8px}}
+@media(max-width:650px){.side-menu{width:44px}.side-tab{width:34px;min-height:34px}body{padding-left:44px}.character-head,.character-row,#character-total{grid-template-columns:1fr 110px 120px;gap:8px}.history-row{grid-template-columns:60px 1fr auto;gap:8px}}
 #week-list:empty::after,#month-list:empty::after{content:"Nothing recorded in this period.";color:var(--muted);font-size:14px}
 .range-list{display:flex;flex-direction:column}
 .range-day{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--edge)}

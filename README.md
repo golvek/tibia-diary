@@ -92,6 +92,21 @@ A barra fixa na esquerda tem tres abas, nesta ordem: **caças** (a tela principa
 A aba **personagens** soma o profit de todos os perfis: cada character com o seu **Raw XP** e o
 profit ja com as despesas descontadas, e o total geral no rodape.
 
+## Fechar semana e mes
+
+A aba **personagens** mostra o total do periodo em andamento, com o botao **This week** /
+**This month**: cada character com o seu **Raw XP** e o profit do periodo (ja com as despesas
+descontadas), e o rodape com a soma de todos (`profile 1 + profile 2 = total`).
+
+O botao **Reset week** / **Reset month** fecha o periodo na hora: os totais comecam de novo a
+partir de hoje e o periodo fechado vai para o **Log**, no fim da tela, com a soma final do
+balance de todos os characters.
+
+A virada tambem acontece sozinha: quando a semana ou o mes viram, o periodo fechado vai para o
+log e a contagem recomeca. O dia de corte vem do **Daily reset** do perfil — com o reset as
+06:00, uma caca que comecou as 03:00 conta no dia anterior. O log e os periodos em andamento
+vão no backup `.json`.
+
 ## Despesas extras
 
 O Hunt Analyzer nao conta tudo: um *recall* de 1 hora por 80k, suprimentos comprados na

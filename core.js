@@ -263,6 +263,26 @@
     const result={version:3,activeProfile:active,profiles};
     // The app title can be renamed by the user.
     if(typeof data.title==='string'&&data.title.trim())result.title=data.title.trim().slice(0,60);
+    // The periods in progress: the totals start again on these days.
+    if(data.periods&&typeof data.periods==='object') {
+      const week=validDate(data.periods.week)?data.periods.week:'';
+      const month=validDate(data.periods.month)?data.periods.month:'';
+      if(week&&month)result.periods={week,month};
+    }
+    // The log of the periods already closed, with the sum of every profile.
+    if(Array.isArray(data.history)&&data.history.length) {
+      const history=data.history.slice(0,240).map(entry=>{
+        if(!entry||typeof entry!=='object')throw new Error('Invalid history entry.');
+        const kind=entry.kind==='month'?'month':'week';
+        if(!validDate(entry.from)||!validDate(entry.to)||entry.to<entry.from)throw new Error('Invalid history period.');
+        const total=Number(entry.total);
+        if(!Number.isSafeInteger(total)||Math.abs(total)>1e12)throw new Error('Invalid history total.');
+        const xp=Number(entry.xp)||0;
+        if(!Number.isSafeInteger(xp)||Math.abs(xp)>1e12)throw new Error('Invalid history XP.');
+        return {kind,from:entry.from,to:entry.to,xp,total};
+      });
+      if(history.length)result.history=history;
+    }
     return result;
   }
 
