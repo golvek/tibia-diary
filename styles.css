@@ -133,9 +133,12 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .range-row.blank{cursor:default}
 .range-row.blank td{opacity:.5}
 .range-row.blank:hover td{background:none}
-.range-row.current td{background:rgba(196,202,212,.08)}
-.range-row.current td.col-date{box-shadow:inset 3px 0 0 var(--accent)}
-.range-weekday{font-weight:bold;color:var(--muted);margin-right:6px}
+/* The day of today is the only one marked in the list. */
+.range-row.current td{background:rgba(196,202,212,.12)}
+.range-row.current td.col-date{box-shadow:inset 3px 0 0 var(--accent);color:var(--accent)}
+.range-row.current td.col-date .range-weekday{color:var(--accent)}
+.range-row.blank.current td{opacity:1}
+.range-weekday{color:var(--muted);margin-right:6px}
 .range-table td button.range-link{font:inherit;font-size:15px;font-weight:bold;text-align:left;background:none;border:0;box-shadow:none;padding:0;min-height:0;color:var(--text);cursor:pointer}
 .range-table td button.range-link:hover{color:var(--accent);filter:none}
 .range-row.current .range-link{color:var(--accent)}
