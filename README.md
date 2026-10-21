@@ -92,6 +92,8 @@ nome padrao.
 
 As janelas e as caixas usam a mesma skin do client do Tibia: textura de pedra (recortada de ssets/tibiabattle.png para ssets/stone.png), moldura com bisel de 1px (luz em cima/esquerda, sombra embaixo/direita) e barra de titulo escura. A cor de destaque e neutra (prateada), sem tons de amarelo. A pasta ssets/ e publicada junto com o site.
 
+As **tabs de hunt** copiam a barra de abas do proprio client (veja ssets/tabs.png): a aba em uso fica *raised*, mais clara e 1px acima, e as outras ficam rebaixadas, com o texto apagado.
+
 ## Menu lateral
 
 A barra fixa na esquerda tem tres abas, nesta ordem: **caças** (a tela principal), **semana e mes** e **personagens**, com os **ajustes** (engrenagem) logo abaixo e o **backup** no rodão dela.
