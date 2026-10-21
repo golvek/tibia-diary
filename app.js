@@ -583,6 +583,11 @@ function showTab(name){
 for(const tab of document.querySelectorAll('.side-tab'))tab.onclick=()=>showTab(tab.dataset.tab);
 $('range-week').onclick=()=>{rangeKind='week';renderRangeView();};
 $('range-month').onclick=()=>{rangeKind='month';renderRangeView();};
+// The button in the dates area takes the user straight to today's hunts.
+$('range-today').onclick=()=>{
+  updatePrefs({anchor:Diary.currentDay(state.preferences.reset)});
+  showTab('hunts');
+};
 $('range-body').addEventListener('click',e=>{const row=e.target.closest('[data-statement]');if(row)openStatement(row.dataset.statement);});
 // The extra costs of a hunt, kept inside its box.
 let editingExpense=null,editingSession='';

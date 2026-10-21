@@ -149,6 +149,8 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 #view-calendar{border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shine),inset -1px -1px var(--shadow);background:var(--panel);max-width:1320px;margin:24px auto;padding:0 18px 18px}
 .view-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 0 6px}
 .range-toggle{display:flex}
+.range-head-right{display:flex;align-items:center;gap:12px}
+.range-today{min-height:0;font-size:13px;font-weight:normal;padding:6px 12px}
 .range-toggle button{font-size:14px;padding:7px 14px;min-height:38px;margin-left:-1px;background:none}
 .range-toggle button:first-child{margin-left:0}
 .range-toggle button.active{background:linear-gradient(var(--button-top),var(--button-bottom));color:var(--accent);position:relative}
