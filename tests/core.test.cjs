@@ -113,6 +113,16 @@ test('preferências corrompidas voltam ao padrão sem apagar seleções vazias',
   assert.deepEqual(d.preferences(null).visible,[...d.defaults]);
   assert.equal(d.validate({version:2,sessions:[],preferences:null}).preferences.reset,'00:00');
 });
+test('os characters da barra de baixo podem ser escondidos nas preferencias',()=>{
+  assert.equal(d.preferences({}).characters,undefined);
+  assert.equal(d.preferences({characters:true}).characters,undefined);
+  assert.equal(d.preferences({characters:false}).characters,false);
+  const prefs={...d.preferences(),characters:false};
+  assert.equal(d.validate({version:2,sessions:[hunt],preferences:prefs}).preferences.characters,false);
+  // A escolha fica no perfil e vai no backup.
+  const store=d.validateStore({version:3,activeProfile:'p1',profiles:[{id:'p1',name:'Knight',sessions:[hunt],preferences:prefs}]});
+  assert.equal(store.profiles[0].preferences.characters,false);
+});
 test('os periodos em andamento e o log das semanas e meses ficam no backup',()=>{
   const base={version:3,activeProfile:'p1',profiles:[{id:'p1',name:'Knight',sessions:[],preferences:{}}]};
   const store=d.validateStore({...base,periods:{week:'2026-10-19',month:'2026-10-01'},history:[

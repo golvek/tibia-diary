@@ -166,6 +166,8 @@
       visible=filtered.length?filtered:(source.visible.length?[...defaults]:[]);
     }
     const result={visible,period:PERIODS.includes(source.period)?source.period:'day',anchor:validDate(source.anchor)?source.anchor:currentDay(reset),reset};
+    // The characters can be hidden from the bottom bar of the screen.
+    if(source.characters===false)result.characters=false;
     return result;
   }
 

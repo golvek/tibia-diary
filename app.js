@@ -477,7 +477,7 @@ function renderTotalsBar(){
     const initial=esc((profile.name||'?').trim().charAt(0).toUpperCase());
     return `<span class="bar-face${current?' current':''}" data-profile="${esc(profile.id)}" title="${current?'Current profile':esc(profile.name)}">${photo||`<span class="bar-face-initial">${initial}</span>`}</span>`;
   }).join('<span class="bar-op">+</span>');
-  const characters=faces?`<div class="bar-characters">${faces}<span class="bar-op">=</span><span class="bar-balance ${totals.total>=0?'positive':'negative'}">${esc(compact(totals.total))}<span class="coin"></span></span></div>`:'';
+  const characters=faces&&state.preferences.characters!==false?`<div class="bar-characters">${faces}<span class="bar-op">=</span><span class="bar-balance ${totals.total>=0?'positive':'negative'}">${esc(compact(totals.total))}<span class="coin"></span></span></div>`:'';
   const s=periodSummary('week');
   const sign=s.balance>=0?'positive':'negative';
   const week=`<div class="bar-total"><span class="bar-label">week total</span><span class="bar-xp">${s.days?esc(compact(s.xp)):'—'} xp</span><span class="bar-sep">|</span><span class="bar-balance ${sign}">${s.days?esc(compact(s.balance)):'—'}<span class="coin"></span></span></div>`;
@@ -503,6 +503,7 @@ function render(){
   if(rollPeriods())writeStore();
   const prefs=state.preferences;
   $('anchor').value=prefs.anchor;$('daily-reset').value=prefs.reset;
+  $('show-characters').checked=prefs.characters!==false;
   $('day-button').textContent=`${weekdayLabel(prefs.anchor)} ${dateLabel(prefs.anchor)}`;
   $('field-checkboxes').innerHTML=Diary.fields.map(f=>`<label><input type="checkbox" value="${f.key}" ${prefs.visible.includes(f.key)?'checked':''}>${esc(f.label)}</label>`).join('');
   // Oldest first, so the boxes read from left to right as the day happened.
@@ -742,6 +743,8 @@ $('sessions').addEventListener('keydown',e=>{
 function updatePrefs(patch){save({...state,preferences:{...state.preferences,...patch}});}
 $('field-checkboxes').addEventListener('change',()=>updatePrefs({visible:[...$('field-checkboxes').querySelectorAll('input:checked')].map(input=>input.value)}));
 $('reset-fields').onclick=()=>updatePrefs({visible:[...Diary.defaults]});
+// The characters on the bottom bar can be turned off in the settings.
+$('show-characters').addEventListener('change',()=>updatePrefs({characters:$('show-characters').checked}));
 function openStatement(date){
   statementDate=date;
   const statement=statementMarkup(date);
