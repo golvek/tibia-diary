@@ -122,13 +122,6 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .range-pin[aria-pressed=true]{color:var(--accent)}
 .range-pin .pin-fill{fill:none}
 .range-pin[aria-pressed=true] .pin-fill{fill:currentColor}
-.range-summary-list{margin:0;display:flex;flex-direction:column}
-.range-summary-item{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--edge)}
-.range-summary-item:last-child{border-bottom:0;padding-bottom:0}
-.range-summary-item dt{font-size:14px;color:var(--muted)}
-.range-summary-item dd{margin:0;font-size:19px;font-weight:bold;font-variant-numeric:tabular-nums;text-align:right}
-.range-summary-item.total dd{font-size:23px}
-.range-summary-item.total{border-bottom:0;padding-bottom:0}
 .range-row{cursor:pointer}
 .range-row.blank{cursor:default}
 .range-row.blank td{opacity:.5}
@@ -147,10 +140,16 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .range-row.total .range-total-label{font-weight:bold}
 .range-row.total .col-xp{color:var(--text)}
 .range-row.total .range-pin{margin-left:8px;vertical-align:-3px}
-/* The pinned cards stay at the bottom of the main screen, under the hunts. */
-.pinned-totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0 0}
-@media(max-width:900px){.range-view{grid-template-columns:minmax(0,1fr)}.range-summary-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}.pinned-totals{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:650px){.range-table th.col-xp{width:120px}.range-table th.col-balance{width:140px}.range-table th{padding:0 8px 7px}.range-table td{padding:8px}.range-table td,.range-table td button.range-link{font-size:14px}.range-weekday{margin-right:4px}.range-summary-list{grid-template-columns:minmax(0,1fr)}}
+/* The pinned totals stay at the bottom of the main screen, one line each. */
+.pinned-totals{display:flex;flex-direction:column;gap:6px;margin:18px 0 0}
+.pinned-total{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;gap:8px;align-items:baseline;padding:8px 12px;background:var(--inset);border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shadow)}
+.pinned-total-label{font-size:15px;font-weight:bold}
+.pinned-total-xp{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.pinned-total-balance{text-align:right;font-size:17px;font-weight:bold;font-variant-numeric:tabular-nums}
+.pinned-total-balance.positive{color:var(--good)}
+.pinned-total-balance.negative{color:var(--bad)}
+@media(max-width:900px){.range-view{display:block}}
+@media(max-width:650px){.range-table th.col-xp{width:120px}.range-table th.col-balance{width:140px}.range-table th{padding:0 8px 7px}.range-table td{padding:8px}.range-table td,.range-table td button.range-link{font-size:14px}.range-weekday{margin-right:4px}.pinned-total{grid-template-columns:auto auto minmax(0,1fr) auto auto;gap:6px;padding:7px 8px}}
 #view-calendar{border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shine),inset -1px -1px var(--shadow);background:var(--panel);max-width:1320px;margin:24px auto;padding:0 18px 18px}
 .view-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 0 6px}
 .range-toggle{display:flex}

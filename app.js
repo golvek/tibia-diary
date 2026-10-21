@@ -438,14 +438,6 @@ function pinButton(kind){
   const pinned=isPinned(kind);
   return `<button type="button" class="range-pin" data-pin="${kind}" aria-pressed="${pinned}" title="${pinned?'Unpin this card from the main screen':'Pin this card on the main screen'}" aria-label="${pinned?'Unpin':'Pin'} ${title}">${PIN_SVG}</button>`;
 }
-function summaryCard(kind){
-  const s=periodSummary(kind);
-  const title=kind==='week'?'Week total':'Month total';
-  return `<aside class="range-summary"><div class="range-summary-head"><h3 class="range-summary-title">${esc(title)}</h3>${pinButton(kind)}</div><p class="range-summary-period">${esc(s.label)}</p><dl class="range-summary-list">
-    <div class="range-summary-item"><dt>Raw XP</dt><dd>${s.days?esc(number(s.xp)):'—'}</dd></div>
-    <div class="range-summary-item total"><dt>Balance</dt><dd class="${s.balance>=0?'positive':'negative'}">${s.days?esc(number(s.balance)):'—'}</dd></div>
-  </dl></aside>`;
-}
 // Fixing a card on the main screen is done from the card itself.
 function togglePin(kind){
   if(kind!=='week'&&kind!=='month')return;
@@ -494,12 +486,17 @@ function rangeViewMarkup(kind){
   const total=`<tr class="range-row total"><td class="col-date"><span class="range-total-label">${esc(totalLabel)}</span>${pinButton(kind)}</td><td class="col-xp">${summary.days?esc(number(summary.xp)):'—'}</td><td class="col-balance ${summary.balance>=0?'positive':'negative'}">${summary.days?esc(number(summary.balance)):'—'}</td></tr>`;
   return {label,html:`<div class="range-view"><div class="range-wrap"><table class="range-table"><thead><tr><th scope="col" class="col-date">Date</th><th scope="col" class="col-xp">Raw XP</th><th scope="col" class="col-balance">Balance</th></tr></thead><tbody>${rows.join('')}</tbody><tfoot>${total}</tfoot></table></div></div>`};
 }
-// The pinned cards stay on the main screen, next to the hunts of the day.
+// The pinned totals stay at the bottom of the main screen, in one line each.
 function renderPinnedTotals(){
   const pinned=Array.isArray(state.preferences.pinned)?state.preferences.pinned:[];
   const panel=$('pinned-totals');
   panel.hidden=!pinned.length;
-  panel.innerHTML=pinned.map(kind=>summaryCard(kind)).join('');
+  panel.innerHTML=pinned.map(kind=>{
+    const s=periodSummary(kind);
+    const title=kind==='week'?'Week total':'Month total';
+    const sign=s.balance>=0?'positive':'negative';
+    return `<div class="pinned-total"><span class="pinned-total-label">${esc(title)}</span>${pinButton(kind)}<span class="pinned-total-xp">${s.days?esc(number(s.xp)):'—'}</span><span class="character-sep">|</span><span class="pinned-total-balance ${sign}">${s.days?esc(number(s.balance)):'—'}</span></div>`;
+  }).join('');
 }
 function renderRangeView(){
   const view=rangeViewMarkup(rangeKind);
