@@ -507,8 +507,10 @@ function renderTabs(){
   const tabs=state.tabs||[];
   const active=state.activeTab||'';
   const all=`<button type="button" class="tab${active?'':' active'}" data-tab="">All</button>`;
-  const list=tabs.map(name=>`<button type="button" class="tab${active===name?' active':''}" data-tab="${esc(name)}" title="${esc(name)}">${esc(name)}<span class="tab-remove" data-remove-tab="${esc(name)}" role="button" tabindex="0" aria-label="Remove the tab ${esc(name)}">×</span></button>`).join('');
-  $('tabs-bar').innerHTML=all+list+'<button type="button" class="tab add" data-new-tab="+">+</button>';
+  const list=tabs.map(name=>`<button type="button" class="tab${active===name?' active':''}" data-tab="${esc(name)}" title="${esc(name)}">${esc(name)}</button>`).join('');
+  // The X on the right closes the tab in use, like the client window.
+  const close=`<button type="button" class="tab-close" data-close-tab="×" title="${active?'Close the tab '+active:'Open a tab to close it'}" aria-label="Close the current tab"${active?'':' disabled'}>×</button>`;
+  $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button>`+close;
 }
 function setTab(name){
   if(name===state.activeTab)return;
@@ -570,19 +572,15 @@ $('tabs-bar').addEventListener('drop',e=>{
   if(id)moveSessionToTab(id,tab.dataset.tab);
 });
 $('tabs-bar').addEventListener('click',e=>{
-  const remove=e.target.closest('[data-remove-tab]');
-  if(remove){e.stopPropagation();removeTab(remove.dataset.removeTab);return;}
+  const close=e.target.closest('[data-close-tab]');
+  if(close){
+    if(state.activeTab)removeTab(state.activeTab);
+    return;
+  }
   const add=e.target.closest('[data-new-tab]');
   if(add){openTabForm();return;}
   const tab=e.target.closest('[data-tab]');
   if(tab)setTab(tab.dataset.tab);
-});
-$('tabs-bar').addEventListener('keydown',e=>{
-  if(e.key!=='Enter'&&e.key!==' ')return;
-  const remove=e.target.closest('[data-remove-tab]');
-  if(!remove)return;
-  e.preventDefault();
-  removeTab(remove.dataset.removeTab);
 });
 function openTabForm(){
   $('tab-name').value='';

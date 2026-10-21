@@ -98,6 +98,10 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .tab:hover{color:var(--text);filter:brightness(1.2)}
 .tab.active{color:#f2efe6;background-color:#5b5d64;background-image:linear-gradient(rgba(0,0,0,.12),rgba(0,0,0,.12)),var(--stone);border-color:#7c7e86;box-shadow:inset 1px 1px #9d9fa7,inset -1px -1px #1a1b1e;z-index:2}
 .tab.add{font-size:17px;font-weight:bold;padding:3px 14px;letter-spacing:0}
+/* The X that closes the tab in use, like the button of the client window. */
+.tab-close{margin-left:auto;align-self:flex-start;margin-top:3px;width:20px;height:20px;min-height:20px;padding:0;font-size:13px;line-height:1;font-weight:bold;color:#c6c6be;background-color:#2f302e;background-image:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)),var(--stone);background-repeat:repeat;border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shadow),inset -1px -1px #4a4a44;text-shadow:1px 1px 0 #16170f}
+.tab-close:hover{color:#fff;background-color:#5a3a3a;filter:none}
+.tab-close:disabled{opacity:.35;cursor:default}
 .tab.over{color:#f2efe6;background-color:#5b5d64;box-shadow:inset 1px 1px #9d9fa7,inset -1px -1px #1a1b1e,0 0 0 2px var(--accent);filter:brightness(1.1);z-index:3}
 .tab-remove{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;font-size:15px;line-height:1;color:inherit;cursor:pointer;opacity:.6}
 .tab-remove:hover{color:var(--bad);opacity:1}
