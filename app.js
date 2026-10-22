@@ -560,6 +560,30 @@ $('presets-open').onclick=()=>{
   $('preset-dialog').showModal();
   $('preset-label').focus();
 };
+// The items tab: the quick costs, all of them in one place.
+function renderItems(){
+  const presets=state.presets||[];
+  $('items-list').innerHTML=presets.length
+    ? presets.map(preset=>{
+      const {quantity,name}=Diary.parseLabel(preset.label);
+      const label=quantity>1?`${quantity}× ${name}`:name;
+      const total=preset.amount*quantity;
+      const picture=preset.icon?`<span class="item-icon"><img src="assets/${esc(preset.icon)}" alt="" onerror="this.remove()"></span>`:'<span class="item-icon none"></span>';
+      return `<div class="item-row">${picture}<button type="button" class="item-use" data-use-preset="${esc(preset.id)}" title="Add to the last hunt"><span class="item-name">${esc(label)}</span><span class="item-cost">${esc(number(total))}<span class="coin" aria-hidden="true"></span></span></button><button type="button" class="item-remove" data-remove-preset="${esc(preset.id)}" aria-label="Remove the item ${esc(label)}" title="Remove this item">×</button></div>`;
+    }).join('')
+    : '<p class="muted">No item yet. Use “Add item” to create one.</p>';
+}
+$('items-list').addEventListener('click',e=>{
+  const remove=e.target.closest('[data-remove-preset]');
+  if(remove){removePreset(remove.dataset.removePreset);return;}
+  const use=e.target.closest('[data-use-preset]');
+  if(use){usePreset(use.dataset.usePreset,lastHunt());showTab('hunts');}
+});
+$('items-add').onclick=()=>{
+  renderImageGallery();
+  $('preset-dialog').showModal();
+  $('preset-label').focus();
+};
 // The quick items on the screen: one click and the cost lands on the last hunt.
 $('tabs-bar').addEventListener('click',e=>{
   const remove=e.target.closest('[data-remove-preset]');
@@ -774,6 +798,7 @@ function render(){
   $('paste-hint').hidden=!noLogs;
   $('sessions').innerHTML=sessions.length?cardsMarkup(sessions):(noLogs?'':'<div class="empty">No hunts for this day. Paste a report above.</div>');
   renderTabs();
+  renderItems();
   renderProfiles();
   renderCharacters();
   renderRangeView();
@@ -922,8 +947,10 @@ function showTab(name){
   $('view-hunts').hidden=name!=='hunts';
   $('view-calendar').hidden=name!=='calendar';
   $('view-characters').hidden=name!=='characters';
+  $('view-items').hidden=name!=='items';
   for(const tab of document.querySelectorAll('.side-tab'))tab.classList.toggle('active',tab.dataset.tab===name);
   if(name==='characters')renderCharacters();
+  if(name==='items')renderItems();
   if(name==='calendar')renderRangeView();
   window.scrollTo({top:0,behavior:'smooth'});
 }
