@@ -489,11 +489,12 @@ function lastHunt(){
   return hunts[hunts.length-1]||null;
 }
 // The quick items: the presets on the screen, without opening any window.
-function renderQuickItems(){
+// The quick items live in the bar of the tabs: one click and the cost goes to
+// the expenses of the last hunt pasted.
+function quickItemsMarkup(){
   const presets=state.presets||[];
-  const bar=$('quick-items');
-  bar.hidden=!presets.length;
-  bar.innerHTML=presets.map(preset=>{
+  if(!presets.length)return '';
+  return presets.map(preset=>{
     const {quantity,name}=Diary.parseLabel(preset.label);
     const label=quantity>1?`${quantity}× ${name}`:name;
     const total=preset.amount*quantity;
@@ -535,12 +536,10 @@ function addPreset(){
   $('preset-label').value='';$('preset-amount').value='';$('preset-icon').value='';$('preset-preview').textContent='';
   save({...state,presets});
   renderPresets();
-  renderQuickItems();
 }
 function removePreset(id){
   save({...state,presets:(state.presets||[]).filter(p=>p.id!==id)});
   renderPresets();
-  renderQuickItems();
 }
 function updatePresetPreview(){
   const unit=Diary.parseAmount($('preset-amount').value);
@@ -583,9 +582,9 @@ $('preset-list').addEventListener('click',e=>{
   if(use){usePreset(use.dataset.usePreset);$('preset-dialog').close();}
 });
 // The quick items on the screen: one click and the cost lands on the last hunt.
-$('quick-items').addEventListener('click',e=>{
+$('tabs-bar').addEventListener('click',e=>{
   const item=e.target.closest('[data-use-preset]');
-  if(item)usePreset(item.dataset.usePreset,lastHunt());
+  if(item){usePreset(item.dataset.usePreset,lastHunt());return;}
 });
 $('preset-form').addEventListener('submit',e=>{e.preventDefault();addPreset();});
 $('preset-amount').addEventListener('input',updatePresetPreview);
@@ -634,7 +633,7 @@ function renderTabs(){
   const shown=[...document.querySelectorAll('#sessions .analyser-card')].map(c=>c.dataset.id);
   const collapsed=shown.length>0&&shown.every(id=>minimizedCards.has(id));
   const collapse=`<button type="button" class="tab-close" data-collapse-all="minimize" aria-pressed="${collapsed}" title="${collapsed?'Expand every analyzer':'Minimize every analyzer'}" aria-label="${collapsed?'Expand':'Minimize'} every analyzer">${collapsed?EXPAND_SVG:MINIMIZE_SVG}</button>`;
-  $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button><span class="tab-buttons">${collapse}${close}</span>`;
+  $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button><span class="quick-items">${quickItemsMarkup()}</span><span class="tab-buttons">${collapse}${close}</span>`;
 }
 // Every analyzer of the day can be collapsed or expanded at once.
 function toggleCollapseAll(){
@@ -794,7 +793,6 @@ function render(){
   $('paste-hint').hidden=!noLogs;
   $('sessions').innerHTML=sessions.length?cardsMarkup(sessions):(noLogs?'':'<div class="empty">No hunts for this day. Paste a report above.</div>');
   renderTabs();
-  renderQuickItems();
   renderProfiles();
   renderCharacters();
   renderRangeView();

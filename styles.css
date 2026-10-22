@@ -62,7 +62,7 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 #tab-dialog{width:min(400px,calc(100% - 28px))}
 .range-group{display:flex;margin-left:auto}
 /* The quick items: the costs always at hand, one click to the last hunt. */
-.quick-items{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-6px 0 12px;padding:6px 0}
+.quick-items{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:16px;padding-left:16px;border-left:1px solid var(--edge);min-width:0;overflow:hidden}
 .quick-item{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:4px 10px;font-size:13px;font-weight:normal;background-color:#3f413b;background-image:linear-gradient(rgba(0,0,0,.22),rgba(0,0,0,.22)),var(--stone);background-repeat:repeat;border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shine),inset -1px -1px var(--shadow)}
 .quick-item:hover{filter:brightness(1.16)}
 .quick-item:active{transform:translateY(1px);box-shadow:inset 1px 1px var(--shadow),inset -1px -1px var(--shine)}

@@ -125,11 +125,13 @@ salve: o preset guarda o preco **de um** item, entao `2x silver token` sai por `
 Clicar num preset **joga a despesa na caca da tab em uso** (a mais recente do dia), e o
 balance dela ja cai com o custo. O `×` apaga o preset. Os presets sao do perfil e vao no backup.
 
-Cada preset pode ter a **imagem do item**: no campo `Picture` da janela de presets, ou clicking
+Cada preset pode ter a **imagem do item**: no campo `Picture` da janela de presets, ou clicando
 na miniatura da galeria. As miniaturas vem da lista `assets/images.json` — para usar uma imagem
-nova, ponha o arquivo na pasta `assets/` e acrescente o nome na lista. A imagem aparece no
-quadradinho do item, na barra de itens rapidos (no topo dos logs, sempre visivel): um clique e
-a despesa cai no **ultimo log colado**.
+nova, ponha o arquivo na pasta `assets/` e acrescente o nome na lista.
+
+O preset vira um **item na barra das tabs**, logo acima dos logs: um clique e a despesa cai nas
+**expenses do ultimo log colado**, sem precisar abrir nenhuma janela. A janela de presets so
+serve para criar e apagar itens.
 
 **Itens rapidos:** os presets aparecem tambem numa **barra em cima dos logs**, sem abrir
 nenhuma janela — um clique e a despesa cai no **ultimo log colado**. Da para colocar a
