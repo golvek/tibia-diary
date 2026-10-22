@@ -479,8 +479,37 @@ function rangeViewMarkup(kind){
 function currentHunt(){
   const tab=state.activeTab||'';
   const day0=state.preferences.anchor;
-  const hunts=state.sessions.filter(s=>day(s)===day0&&(!tab||s.group===tab)).sort((a,b)=>(a.start||b.start||a.date).localeCompare(b.start||b.start||b.date));
+  const hunts=state.sessions.filter(s=>day(s)===day0&&(!tab||s.group===tab)).sort((a,b)=>(a.start||a.start||a.date).localeCompare(b.start||b.start||b.date));
   return hunts[hunts.length-1]||null;
+}
+// The last hunt pasted, the one the quick items add the cost to.
+function lastHunt(){
+  const day0=state.preferences.anchor;
+  const hunts=state.sessions.filter(s=>day(s)===day0).sort((a,b)=>(a.start||a.date).localeCompare(b.start||b.date));
+  return hunts[hunts.length-1]||null;
+}
+// The quick items: the presets on the screen, without opening any window.
+function renderQuickItems(){
+  const presets=state.presets||[];
+  const bar=$('quick-items');
+  bar.hidden=!presets.length;
+  bar.innerHTML=presets.map(preset=>{
+    const {quantity,name}=Diary.parseLabel(preset.label);
+    const label=quantity>1?`${quantity}× ${name}`:name;
+    const total=preset.amount*quantity;
+    const picture=preset.icon?`<img class="quick-item-img" src="assets/${esc(preset.icon)}" alt="" onerror="this.remove()">`:'';
+    return `<button type="button" class="quick-item" data-use-preset="${esc(preset.id)}" title="Add ${esc(label)} — ${esc(number(total))} to the last hunt">${picture}<span class="quick-item-name">${esc(label)}</span><span class="quick-item-cost">${esc(compact(total))}</span></button>`;
+  }).join('');
+}
+function usePreset(id,hunt){
+  const preset=(state.presets||[]).find(p=>p.id===id);
+  if(!preset)return;
+  const target=hunt||currentHunt();
+  const {quantity,name}=Diary.parseLabel(preset.label);
+  const amount=preset.amount*quantity;
+  const expense={id:newId(),label:preset.label,amount,quantity,date:target?day(target):state.preferences.anchor,sessionId:target?target.id:''};
+  if(!save({...state,expenses:[...state.expenses,expense]}))return;
+  toast(`Added ${name}: ${number(amount)}.`);
 }
 // The presets of expense: click one to add that cost to the hunt of the tab.
 function renderPresets(){
@@ -494,17 +523,6 @@ function renderPresets(){
     }).join('')
     : '<p class="muted">No preset yet.</p>';
 }
-function usePreset(id){
-  const preset=(state.presets||[]).find(p=>p.id===id);
-  if(!preset)return;
-  const hunt=currentHunt();
-  const {quantity,name}=Diary.parseLabel(preset.label);
-  const amount=preset.amount*quantity;
-  const expense={id:newId(),label:preset.label,amount,quantity,date:hunt?day(hunt):state.preferences.anchor,sessionId:hunt?hunt.id:''};
-  if(!save({...state,expenses:[...state.expenses,expense]}))return;
-  $('preset-dialog').close();
-  toast(`Added ${name}: ${number(amount)}.`);
-}
 function addPreset(){
   const label=$('preset-label').value.trim().slice(0,60);
   const unit=Diary.parseAmount($('preset-amount').value);
@@ -512,14 +530,17 @@ function addPreset(){
   const {quantity}=Diary.parseLabel(label);
   const amount=unit*quantity;
   if(!Number.isSafeInteger(amount)||Math.abs(amount)>1e12){toast('That cost is too high.',true);return;}
-  const presets=[...(state.presets||[]),{id:newId(),label,amount:unit,quantity}];
-  $('preset-label').value='';$('preset-amount').value='';$('preset-preview').textContent='';
+  const icon=$('preset-icon').value.trim().slice(0,80);
+  const presets=[...(state.presets||[]),{id:newId(),label,amount:unit,quantity,icon}];
+  $('preset-label').value='';$('preset-amount').value='';$('preset-icon').value='';$('preset-preview').textContent='';
   save({...state,presets});
   renderPresets();
+  renderQuickItems();
 }
 function removePreset(id){
   save({...state,presets:(state.presets||[]).filter(p=>p.id!==id)});
   renderPresets();
+  renderQuickItems();
 }
 function updatePresetPreview(){
   const unit=Diary.parseAmount($('preset-amount').value);
@@ -535,7 +556,12 @@ $('preset-list').addEventListener('click',e=>{
   const remove=e.target.closest('[data-remove-preset]');
   if(remove){removePreset(remove.dataset.removePreset);return;}
   const use=e.target.closest('[data-use-preset]');
-  if(use)usePreset(use.dataset.usePreset);
+  if(use){usePreset(use.dataset.usePreset);$('preset-dialog').close();}
+});
+// The quick items on the screen: one click and the cost lands on the last hunt.
+$('quick-items').addEventListener('click',e=>{
+  const item=e.target.closest('[data-use-preset]');
+  if(item)usePreset(item.dataset.usePreset,lastHunt());
 });
 $('preset-form').addEventListener('submit',e=>{e.preventDefault();addPreset();});
 $('preset-amount').addEventListener('input',updatePresetPreview);
@@ -744,6 +770,7 @@ function render(){
   $('paste-hint').hidden=!noLogs;
   $('sessions').innerHTML=sessions.length?cardsMarkup(sessions):(noLogs?'':'<div class="empty">No hunts for this day. Paste a report above.</div>');
   renderTabs();
+  renderQuickItems();
   renderProfiles();
   renderCharacters();
   renderRangeView();

@@ -242,7 +242,11 @@
     if(!label)throw new Error('The preset needs a description.');
     const amount=Number(preset.amount);
     if(!Number.isSafeInteger(amount)||Math.abs(amount)>1e12)throw new Error('Invalid preset amount.');
-    return {id:preset.id,label,amount,quantity:parseLabel(label).quantity};
+    const result={id:preset.id,label,amount,quantity:parseLabel(label).quantity};
+    // The picture of the item, kept in the assets folder.
+    const icon=String(preset.icon??'').trim().slice(0,80);
+    if(/^[A-Za-z0-9._-]+\.(gif|png|jpg|jpeg|webp)$/i.test(icon))result.icon=icon;
+    return result;
   }
 
   function validateProfile(profile,version=2) {

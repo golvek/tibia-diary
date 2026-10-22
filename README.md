@@ -125,6 +125,11 @@ salve: o preset guarda o preco **de um** item, entao `2x silver token` sai por `
 Clicar num preset **joga a despesa na caca da tab em uso** (a mais recente do dia), e o
 balance dela ja cai com o custo. O `×` apaga o preset. Os presets sao do perfil e vao no backup.
 
+**Itens rapidos:** os presets aparecem tambem numa **barra em cima dos logs**, sem abrir
+nenhuma janela — um clique e a despesa cai no **ultimo log colado**. Da para colocar a
+**imagem do item** (o nome do arquivo dentro de `assets/`, por exemplo
+`Enchanted_Sleep_Shawl.gif`), que aparece no quadradinho do item.
+
 ## Despesas extras
 
 O Hunt Analyzer nao conta tudo: um *recall* de 1 hora por 80k, suprimentos comprados na

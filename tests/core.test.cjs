@@ -161,6 +161,12 @@ test('os presets de despesa ficam no perfil e vao no backup',()=>{
   assert.throws(()=>d.validateProfile({...base,presets:[{id:'ps1',label:'x',amount:1},{id:'ps1',label:'y',amount:2}]}));
   // Sem preset, o perfil continua valendo.
   assert.equal(d.validateProfile(base).presets,undefined);
+  // A picture do item, quando o arquivo existe na pasta assets.
+  const withIcon=d.validateProfile({...base,presets:[{id:'ps1',label:'sleep shawl',amount:80000,icon:'Enchanted_Sleep_Shawl.gif'}]});
+  assert.equal(withIcon.presets[0].icon,'Enchanted_Sleep_Shawl.gif');
+  // Um caminho fora da pasta assets e recusado.
+  assert.equal(d.validateProfile({...base,presets:[{id:'ps1',label:'x',amount:1,icon:'../../etc/passwd'}]}).presets[0].icon,undefined);
+  assert.equal(d.validateProfile({...base,presets:[{id:'ps1',label:'x',amount:1,icon:'x.exe'}]}).presets[0].icon,undefined);
   // Os presets seguem para o backup.
   const store=d.validateStore({version:3,activeProfile:'p1',profiles:[profile]});
   assert.equal(store.profiles[0].presets.length,2);
