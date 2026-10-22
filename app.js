@@ -493,15 +493,16 @@ function lastHunt(){
 // The quick items: the presets on the screen, without opening any window.
 // The quick items live in the bar of the tabs: one click and the cost goes to
 // the expenses of the last hunt pasted.
-function quickItemsMarkup(){
+// The quick items, at the left of the Presets button: one click and the cost
+// lands on the expenses of the last hunt pasted.
+function renderQuickItems(){
   const presets=(state.presets||[]).filter(p=>p.pinned);
-  if(!presets.length)return '';
-  return presets.map(preset=>{
+  $('quick-items').innerHTML=presets.map(preset=>{
     const {quantity,name}=Diary.parseLabel(preset.label);
     const label=quantity>1?`${quantity}× ${name}`:name;
     const total=preset.amount*quantity;
     const picture=preset.icon?`<img class="quick-item-img" src="assets/${esc(preset.icon)}" alt="" onerror="this.remove()">`:`<span class="quick-item-img letter">${esc(name.charAt(0).toUpperCase())}</span>`;
-    return `<span class="quick-item-box"><button type="button" class="quick-item" data-use-preset="${esc(preset.id)}" title="${esc(label)} — ${esc(number(total))}">${picture}</button><button type="button" class="quick-item-remove" data-remove-preset="${esc(preset.id)}" aria-label="Remove the item ${esc(label)}" title="Remove this item">×</button></span>`;
+    return `<button type="button" class="quick-item" data-use-preset="${esc(preset.id)}" title="${esc(label)} — ${esc(number(total))}">${picture}</button>`;
   }).join('');
 }
 function usePreset(id,hunt){
@@ -595,9 +596,7 @@ $('items-add').onclick=()=>{
   $('preset-label').focus();
 };
 // The quick items on the screen: one click and the cost lands on the last hunt.
-$('tabs-bar').addEventListener('click',e=>{
-  const remove=e.target.closest('[data-remove-preset]');
-  if(remove){removePreset(remove.dataset.removePreset);return;}
+$('quick-items').addEventListener('click',e=>{
   const item=e.target.closest('[data-use-preset]');
   if(item){usePreset(item.dataset.usePreset,lastHunt());return;}
 });
@@ -648,7 +647,7 @@ function renderTabs(){
   const shown=[...document.querySelectorAll('#sessions .analyser-card')].map(c=>c.dataset.id);
   const collapsed=shown.length>0&&shown.every(id=>minimizedCards.has(id));
   const collapse=`<button type="button" class="tab-close" data-collapse-all="minimize" aria-pressed="${collapsed}" title="${collapsed?'Expand every analyzer':'Minimize every analyzer'}" aria-label="${collapsed?'Expand':'Minimize'} every analyzer">${collapsed?EXPAND_SVG:MINIMIZE_SVG}</button>`;
-  $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button><span class="quick-items">${quickItemsMarkup()}</span><span class="tab-buttons">${collapse}${close}</span>`;
+  $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button><span class="tab-buttons">${collapse}${close}</span>`;
 }
 // Every analyzer of the day can be collapsed or expanded at once.
 function toggleCollapseAll(){
@@ -808,6 +807,7 @@ function render(){
   $('paste-hint').hidden=!noLogs;
   $('sessions').innerHTML=sessions.length?cardsMarkup(sessions):(noLogs?'':'<div class="empty">No hunts for this day. Paste a report above.</div>');
   renderTabs();
+  renderQuickItems();
   renderItems();
   renderProfiles();
   renderCharacters();

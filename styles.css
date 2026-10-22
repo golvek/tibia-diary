@@ -62,11 +62,8 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 #tab-dialog{width:min(400px,calc(100% - 28px))}
 .range-group{display:flex;margin-left:auto}
 /* The quick items: the costs always at hand, one click to the last hunt. */
-.quick-items{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:16px;padding-left:16px;border-left:1px solid var(--edge);min-width:0;overflow:hidden}
-.quick-item-box{position:relative;display:inline-flex}
-.quick-item-remove{position:absolute;top:-5px;right:-5px;width:15px;height:15px;min-height:0;padding:0;font-size:11px;line-height:1;background:var(--edge);color:var(--muted);border-radius:50%;opacity:0;transition:opacity .12s;z-index:2}
-.quick-item-box:hover .quick-item-remove{opacity:1}
-.quick-item-remove:hover{color:var(--bad);filter:none}
+.quick-items{display:inline-flex;align-items:center;gap:6px;margin-right:12px;padding-right:12px;border-right:1px solid var(--edge);min-width:0}
+.quick-items:empty{display:none}
 .quick-item{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;min-height:30px;padding:2px;background-color:#3f413b;background-image:linear-gradient(rgba(0,0,0,.22),rgba(0,0,0,.22)),var(--stone);background-repeat:repeat;border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shine),inset -1px -1px var(--shadow)}
 .quick-item:hover{filter:brightness(1.16)}
 .quick-item-img{width:24px;height:24px;object-fit:contain;image-rendering:pixelated;flex:0 0 auto;background:#15161b;border:1px solid var(--edge);padding:1px;display:block}
