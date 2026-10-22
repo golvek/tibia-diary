@@ -493,9 +493,6 @@ function renderTotalsBar(){
   const sign=s.balance>=0?'positive':'negative';
   const week=`<div class="bar-total"><span class="bar-label">week total</span><span class="bar-xp">${s.days?esc(compact(s.xp)):'—'} xp</span><span class="bar-sep">|</span><span class="bar-balance ${sign}">${s.days?esc(compact(s.balance)):'—'}<span class="coin"></span></span></div>`;
   panel.innerHTML=characters+week;
-  // The bar is fixed on the bottom, so the page keeps room for it.
-  document.body.classList.add('has-totals-bar');
-  document.body.style.paddingBottom=panel.offsetHeight+'px';
 }
 // Clicking a photo on the bar switches to that character.
 $('totals-bar').addEventListener('click',e=>{
