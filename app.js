@@ -677,7 +677,10 @@ function render(){
   // Only the hunts of the tab in use are shown.
   const tab=prefs.activeTab||state.activeTab||'';
   const sessions=state.sessions.filter(s=>day(s)===prefs.anchor&&(!tab||s.group===tab)).sort((a,b)=>(a.start||a.date).localeCompare(b.start||b.date));
-  $('sessions').innerHTML=sessions.length?cardsMarkup(sessions):'<div class="empty">No hunts for this day. Paste a report above.</div>';
+  // The hint shows only while there is no hunt at all in this profile.
+  const noLogs=!state.sessions.length;
+  $('paste-hint').hidden=!noLogs;
+  $('sessions').innerHTML=sessions.length?cardsMarkup(sessions):(noLogs?'':'<div class="empty">No hunts for this day. Paste a report above.</div>');
   renderTabs();
   renderProfiles();
   renderCharacters();
