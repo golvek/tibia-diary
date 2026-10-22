@@ -58,6 +58,7 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .expense-row .expense-remove:hover{color:var(--bad)}
 .expense-total{display:grid;grid-template-columns:minmax(110px,1fr) 116px 26px;gap:10px;align-items:center;padding:7px 0 0;margin-top:6px;border-top:1px solid var(--edge);font-size:15px;font-variant-numeric:tabular-nums}
 .expense-total span:first-child{color:var(--muted);font-size:14px}.expense-total span:nth-child(2){text-align:right}
+#tab-dialog{width:min(400px,calc(100% - 28px))}
 #expense-dialog{width:min(440px,calc(100% - 28px))}
 #expense-dialog .dialog-title{padding-bottom:12px;margin-bottom:14px}
 .expense-form{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center;margin:0}
