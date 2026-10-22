@@ -287,6 +287,7 @@ body{padding-left:var(--side)}
 .analyser-card .card-icon{flex:0 0 auto;display:flex;align-items:center;line-height:0}
 .analyser-card .card-svg{display:block}
 .analyser-card .card-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.analyser-card .card-title.plain{cursor:default;color:var(--an-title,#d6dae1)}
 .analyser-card .card-title:hover{color:var(--an-text)}
 .analyser-card .card-title:focus-visible{outline:2px solid var(--an-title);outline-offset:2px}
 .analyser-card .card-rename-field{font:inherit;font-size:13px;font-weight:bold;line-height:1.25;color:var(--an-title);background:#1e1f24;border:1px solid var(--an-line);padding:1px 6px;margin:0;width:100%;text-align:center}
