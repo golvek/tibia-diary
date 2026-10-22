@@ -515,7 +515,19 @@ function renderTabs(){
   const list=tabs.map(name=>`<button type="button" class="tab${active===name?' active':''}" data-tab="${esc(name)}" title="${esc(name)} — double click to rename">${esc(name)}</button>`).join('');
   // The X on the right closes the tab in use, like the client window.
   const close=`<button type="button" class="tab-close" data-close-tab="×" title="${active?'Close the tab '+active:'Open a tab to close it'}" aria-label="Close the current tab"${active?'':' disabled'}>×</button>`;
-  $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button>`+close;
+  // The M collapses or expands every analyzer of the day, like the client window.
+  const shown=[...document.querySelectorAll('#sessions .analyser-card')].map(c=>c.dataset.id);
+  const collapsed=shown.length>0&&shown.every(id=>minimizedCards.has(id));
+  const collapse=`<button type="button" class="tab-close" data-collapse-all="M" aria-pressed="${collapsed}" title="${collapsed?'Expand every analyzer':'Minimize every analyzer'}" aria-label="${collapsed?'Expand':'Minimize'} every analyzer">M</button>`;
+  $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button>`+collapse+close;
+}
+// Every analyzer of the day can be collapsed or expanded at once.
+function toggleCollapseAll(){
+  const shown=[...document.querySelectorAll('#sessions .analyser-card')].map(c=>c.dataset.id);
+  if(!shown.length)return;
+  const collapsed=shown.every(id=>minimizedCards.has(id));
+  for(const id of shown){ if(collapsed)minimizedCards.delete(id); else minimizedCards.add(id); }
+  render();
 }
 function setTab(name){
   if(name===state.activeTab)return;
@@ -632,6 +644,8 @@ $('tabs-bar').addEventListener('click',e=>{
     if(state.activeTab)closeTab(state.activeTab);
     return;
   }
+  const collapse=e.target.closest('[data-collapse-all]');
+  if(collapse){toggleCollapseAll();return;}
   const add=e.target.closest('[data-new-tab]');
   if(add){openTabForm();return;}
   const tab=e.target.closest('[data-tab]');
@@ -967,6 +981,15 @@ $('sessions').addEventListener('click',e=>{
   if(rename){startRename(rename.dataset.rename);return;}
   const button=e.target.closest('[data-detail]');
   if(button)detail(button.dataset.detail);
+});
+// Two clicks on the box minimize it or expand it.
+$('sessions').addEventListener('dblclick',e=>{
+  if(e.target.closest('[data-minimize],[data-detail],[data-rename],[data-expense],[data-expense-amount],[data-remove-expense],[data-add-expense],summary,input,a,button'))return;
+  const card=e.target.closest('.analyser-card');
+  if(!card)return;
+  const id=card.dataset.id;
+  if(minimizedCards.has(id))minimizedCards.delete(id);else minimizedCards.add(id);
+  render();
 });
 // The toggle event does not bubble, so it is captured to remember opened lists between renders.
 $('sessions').addEventListener('toggle',e=>{
