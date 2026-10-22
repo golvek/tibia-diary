@@ -246,6 +246,8 @@
     // The picture of the item, kept in the assets folder.
     const icon=String(preset.icon??'').trim().slice(0,80);
     if(/^[A-Za-z0-9._-]+\.(gif|png|jpg|jpeg|webp)$/i.test(icon))result.icon=icon;
+    // A pinned item shows up in the bar of the tabs.
+    if(preset.pinned===true)result.pinned=true;
     return result;
   }
 

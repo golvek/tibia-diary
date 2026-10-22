@@ -254,6 +254,8 @@ function listMarkup(values){return visible().filter(f=>f.type==='list').map(f=>{
 // Inline SVG keeps the icon and the pencil in an exact box, with no font
 // bearing, so they line up pixel by pixel with the data below.
 const ICON_SVG='<svg class="card-svg" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="#9fd66b" d="M2 13V7h3v6H2zm4.5 0V3h3v10h-3zM11 13V9h3v4h-3z"/></svg>';
+// The pin that fixes an item in the bar of the tabs.
+const PIN_SVG='<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.3 1.6h3.4l-.5 3.3 2.3 2.3v1.2H4.5V7.2l2.3-2.3z"/><path d="M8 8.4v6"/></svg>';
 const REPORT_SVG='<svg class="card-svg" viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="currentColor" d="M9 1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5L9 1zm0 1.7L11.3 5H9V2.7zM5 7.5h6v1.2H5V7.5zm0 2.6h6v1.2H5v-1.2zm0-5h2.5v1.2H5V5.1z"/></svg>';
 // The button that minimizes every analyzer, like the client window.
 const MINIMIZE_SVG='<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3.5 11.5h9"/></svg>';
@@ -492,14 +494,14 @@ function lastHunt(){
 // The quick items live in the bar of the tabs: one click and the cost goes to
 // the expenses of the last hunt pasted.
 function quickItemsMarkup(){
-  const presets=state.presets||[];
+  const presets=(state.presets||[]).filter(p=>p.pinned);
   if(!presets.length)return '';
   return presets.map(preset=>{
     const {quantity,name}=Diary.parseLabel(preset.label);
     const label=quantity>1?`${quantity}× ${name}`:name;
     const total=preset.amount*quantity;
-    const picture=preset.icon?`<img class="quick-item-img" src="assets/${esc(preset.icon)}" alt="" onerror="this.remove()">`:'';
-    return `<span class="quick-item-box"><button type="button" class="quick-item" data-use-preset="${esc(preset.id)}" title="Add ${esc(label)} — ${esc(number(total))} to the last hunt">${picture}<span class="quick-item-name">${esc(label)}</span><span class="quick-item-cost">${esc(compact(total))}</span></button><button type="button" class="quick-item-remove" data-remove-preset="${esc(preset.id)}" aria-label="Remove the item ${esc(label)}" title="Remove this item">×</button></span>`;
+    const picture=preset.icon?`<img class="quick-item-img" src="assets/${esc(preset.icon)}" alt="" onerror="this.remove()">`:`<span class="quick-item-img letter">${esc(name.charAt(0).toUpperCase())}</span>`;
+    return `<span class="quick-item-box"><button type="button" class="quick-item" data-use-preset="${esc(preset.id)}" title="${esc(label)} — ${esc(number(total))}">${picture}</button><button type="button" class="quick-item-remove" data-remove-preset="${esc(preset.id)}" aria-label="Remove the item ${esc(label)}" title="Remove this item">×</button></span>`;
   }).join('');
 }
 function usePreset(id,hunt){
@@ -569,16 +571,24 @@ function renderItems(){
       const label=quantity>1?`${quantity}× ${name}`:name;
       const total=preset.amount*quantity;
       const picture=preset.icon?`<span class="item-icon"><img src="assets/${esc(preset.icon)}" alt="" onerror="this.remove()"></span>`:'<span class="item-icon none"></span>';
-      return `<div class="item-row">${picture}<button type="button" class="item-use" data-use-preset="${esc(preset.id)}" title="Add to the last hunt"><span class="item-name">${esc(label)}</span><span class="item-cost">${esc(number(total))}<span class="coin" aria-hidden="true"></span></span></button><button type="button" class="item-remove" data-remove-preset="${esc(preset.id)}" aria-label="Remove the item ${esc(label)}" title="Remove this item">×</button></div>`;
+      const pin=`<button type="button" class="item-pin${preset.pinned?' on':''}" data-pin-preset="${esc(preset.id)}" aria-pressed="${!!preset.pinned}" title="${preset.pinned?'Unpin from the bar of the tabs':'Pin to the bar of the tabs'}" aria-label="${preset.pinned?'Unpin':'Pin'} the item ${esc(label)}">${PIN_SVG}</button>`;
+      return `<div class="item-row">${picture}<button type="button" class="item-use" data-use-preset="${esc(preset.id)}" title="Add to the last hunt"><span class="item-name">${esc(label)}</span><span class="item-cost">${esc(number(total))}<span class="coin" aria-hidden="true"></span></span></button>${pin}<button type="button" class="item-remove" data-remove-preset="${esc(preset.id)}" aria-label="Remove the item ${esc(label)}" title="Remove this item">×</button></div>`;
     }).join('')
     : '<p class="muted">No item yet. Use “Add item” to create one.</p>';
 }
 $('items-list').addEventListener('click',e=>{
   const remove=e.target.closest('[data-remove-preset]');
   if(remove){removePreset(remove.dataset.removePreset);return;}
+  const pin=e.target.closest('[data-pin-preset]');
+  if(pin){togglePresetPin(pin.dataset.pinPreset);return;}
   const use=e.target.closest('[data-use-preset]');
   if(use){usePreset(use.dataset.usePreset,lastHunt());showTab('hunts');}
 });
+// An item can be pinned to the bar of the tabs.
+function togglePresetPin(id){
+  const presets=(state.presets||[]).map(p=>p.id===id?{...p,pinned:p.pinned!==true}:p);
+  save({...state,presets});
+}
 $('items-add').onclick=()=>{
   renderImageGallery();
   $('preset-dialog').showModal();
