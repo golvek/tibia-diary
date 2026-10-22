@@ -19,7 +19,7 @@ function newId(){return window.crypto&&crypto.randomUUID?crypto.randomUUID():'se
 function status(message,error=false){toast(message,error);}
 function currentProfile(){return store.profiles.find(p=>p.id===store.activeProfile)||store.profiles[0];}
 function totalHunts(){return store.profiles.reduce((n,p)=>n+p.sessions.length,0);}
-function applyProfile(profile){state={version:2,sessions:profile.sessions,preferences:profile.preferences,expenses:profile.expenses||[],tabs:profile.tabs||[],activeTab:profile.activeTab||''};}
+function applyProfile(profile){state={version:2,sessions:profile.sessions,preferences:profile.preferences,expenses:profile.expenses||[],tabs:profile.tabs||[],activeTab:profile.activeTab||'',presets:profile.presets||[]};}
 function blankProfile(name){
   return {id:newId(),name:name||'Profile '+(store.profiles.length+1),created:Diary.today(),sessions:[],expenses:[],preferences:Diary.preferences()};
 }
@@ -37,10 +37,10 @@ function writeStore(){
 function save(next,restore=false){
   if(blocked&&!restore){toast('Saving is blocked to protect existing data.');return false;}
   try{
-    const profile=Diary.validateProfile({...currentProfile(),sessions:next.sessions,preferences:next.preferences,expenses:next.expenses,tabs:next.tabs||[],activeTab:next.activeTab||''});
+    const profile=Diary.validateProfile({...currentProfile(),sessions:next.sessions,preferences:next.preferences,expenses:next.expenses,tabs:next.tabs||[],activeTab:next.activeTab||'',presets:next.presets||[]});
     store={...store,profiles:store.profiles.map(p=>p.id===profile.id?profile:p)};
     if(!writeStore())return false;
-    state={version:2,sessions:profile.sessions,preferences:profile.preferences,expenses:profile.expenses,tabs:profile.tabs||[],activeTab:profile.activeTab||''};
+    state={version:2,sessions:profile.sessions,preferences:profile.preferences,expenses:profile.expenses,tabs:profile.tabs||[],activeTab:profile.activeTab||'',presets:profile.presets||[]};
     blocked=false;$('warning').hidden=true;render();return true;
   }catch(error){toast('Could not save: '+error.message);return false;}
 }
@@ -475,6 +475,71 @@ function rangeViewMarkup(kind){
   const total=`<tr class="range-row total"><td class="col-date"><span class="range-total-label">${esc(totalLabel)}</span></td><td class="col-xp">${summary.days?esc(number(summary.xp)):'—'}</td><td class="col-balance ${summary.balance>=0?'positive':'negative'}">${summary.days?esc(number(summary.balance)):'—'}</td></tr>`;
   return {label,html:`<div class="range-view"><div class="range-wrap"><table class="range-table"><thead><tr><th scope="col" class="col-date">Date</th><th scope="col" class="col-xp">Raw XP</th><th scope="col" class="col-balance">Balance</th></tr></thead><tbody>${rows.join('')}</tbody><tfoot>${total}</tfoot></table></div></div>`};
 }
+// The hunt of the tab in use, for the day selected: the most recent one.
+function currentHunt(){
+  const tab=state.activeTab||'';
+  const day0=state.preferences.anchor;
+  const hunts=state.sessions.filter(s=>day(s)===day0&&(!tab||s.group===tab)).sort((a,b)=>(a.start||b.start||a.date).localeCompare(b.start||b.start||b.date));
+  return hunts[hunts.length-1]||null;
+}
+// The presets of expense: click one to add that cost to the hunt of the tab.
+function renderPresets(){
+  const presets=state.presets||[];
+  $('preset-list').innerHTML=presets.length
+    ? presets.map(preset=>{
+      const {quantity,name}=Diary.parseLabel(preset.label);
+      const label=quantity>1?`${quantity}× ${name}`:name;
+      const total=preset.amount*quantity;
+      return `<div class="preset-row"><button type="button" class="preset-use" data-use-preset="${esc(preset.id)}" title="Add this cost to the current hunt"><span class="preset-name">${esc(label)}</span><span class="preset-cost">${esc(number(total))}<span class="coin" aria-hidden="true"></span></span></button><button type="button" class="preset-remove" data-remove-preset="${esc(preset.id)}" aria-label="Remove the preset ${esc(label)}">×</button></div>`;
+    }).join('')
+    : '<p class="muted">No preset yet.</p>';
+}
+function usePreset(id){
+  const preset=(state.presets||[]).find(p=>p.id===id);
+  if(!preset)return;
+  const hunt=currentHunt();
+  const {quantity,name}=Diary.parseLabel(preset.label);
+  const amount=preset.amount*quantity;
+  const expense={id:newId(),label:preset.label,amount,quantity,date:hunt?day(hunt):state.preferences.anchor,sessionId:hunt?hunt.id:''};
+  if(!save({...state,expenses:[...state.expenses,expense]}))return;
+  $('preset-dialog').close();
+  toast(`Added ${name}: ${number(amount)}.`);
+}
+function addPreset(){
+  const label=$('preset-label').value.trim().slice(0,60);
+  const unit=Diary.parseAmount($('preset-amount').value);
+  if(!label||unit===null||unit===0){toast('Type a description and a cost (e.g. 40k).',true);return;}
+  const {quantity}=Diary.parseLabel(label);
+  const amount=unit*quantity;
+  if(!Number.isSafeInteger(amount)||Math.abs(amount)>1e12){toast('That cost is too high.',true);return;}
+  const presets=[...(state.presets||[]),{id:newId(),label,amount:unit,quantity}];
+  $('preset-label').value='';$('preset-amount').value='';$('preset-preview').textContent='';
+  save({...state,presets});
+  renderPresets();
+}
+function removePreset(id){
+  save({...state,presets:(state.presets||[]).filter(p=>p.id!==id)});
+  renderPresets();
+}
+function updatePresetPreview(){
+  const unit=Diary.parseAmount($('preset-amount').value);
+  const {quantity}=Diary.parseLabel($('preset-label').value);
+  $('preset-preview').textContent=unit===null?'':`= ${number(unit*quantity)}${quantity>1?` (${quantity}×)`:''}`;
+}
+$('presets-open').onclick=()=>{
+  renderPresets();
+  $('preset-dialog').showModal();
+  $('preset-label').focus();
+};
+$('preset-list').addEventListener('click',e=>{
+  const remove=e.target.closest('[data-remove-preset]');
+  if(remove){removePreset(remove.dataset.removePreset);return;}
+  const use=e.target.closest('[data-use-preset]');
+  if(use)usePreset(use.dataset.usePreset);
+});
+$('preset-form').addEventListener('submit',e=>{e.preventDefault();addPreset();});
+$('preset-amount').addEventListener('input',updatePresetPreview);
+$('preset-label').addEventListener('input',updatePresetPreview);
 // The totals of the week and the month, on the bar at the bottom of the screen.
 function renderTotalsBar(){
   const panel=$('totals-bar');

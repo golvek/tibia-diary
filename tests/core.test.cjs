@@ -143,6 +143,28 @@ test('as tabs do perfil nomeiam as cacas e ficam no backup',()=>{
   assert.deepEqual(store.profiles[0].tabs,['cave rat','dragons']);
   assert.equal(store.profiles[0].activeTab,'dragons');
 });
+test('os presets de despesa ficam no perfil e vao no backup',()=>{
+  const base={id:'p1',name:'Knight',sessions:[],preferences:{}};
+  const profile=d.validateProfile({...base,presets:[
+    {id:'ps1',label:'2x silver token',amount:40000},
+    {id:'ps2',label:'recall 1h',amount:80000}
+  ]});
+  assert.equal(profile.presets.length,2);
+  assert.equal(profile.presets[0].label,'2x silver token');
+  assert.equal(profile.presets[0].amount,40000);
+  // A quantidade da descricao entra no preset.
+  assert.equal(profile.presets[0].quantity,2);
+  assert.equal(profile.presets[1].quantity,1);
+  // Preset invalido e recusado.
+  assert.throws(()=>d.validateProfile({...base,presets:[{id:'ps1',label:'  ',amount:40000}]}));
+  assert.throws(()=>d.validateProfile({...base,presets:[{id:'ps1',label:'x',amount:1.5}]}));
+  assert.throws(()=>d.validateProfile({...base,presets:[{id:'ps1',label:'x',amount:1},{id:'ps1',label:'y',amount:2}]}));
+  // Sem preset, o perfil continua valendo.
+  assert.equal(d.validateProfile(base).presets,undefined);
+  // Os presets seguem para o backup.
+  const store=d.validateStore({version:3,activeProfile:'p1',profiles:[profile]});
+  assert.equal(store.profiles[0].presets.length,2);
+});
 test('os periodos em andamento e o log das semanas e meses ficam no backup',()=>{
   const base={version:3,activeProfile:'p1',profiles:[{id:'p1',name:'Knight',sessions:[],preferences:{}}]};
   const store=d.validateStore({...base,periods:{week:'2026-10-19',month:'2026-10-01'},history:[

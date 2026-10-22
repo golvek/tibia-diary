@@ -234,6 +234,17 @@
     return {id:expense.id,label,amount,quantity:parseLabel(label).quantity,date:expense.date,sessionId};
   }
 
+  // A preset of expense: a description and the price of one item.
+  function validatePreset(preset) {
+    if(!preset||typeof preset!=='object')throw new Error('Invalid preset.');
+    if(typeof preset.id!=='string'||!/^[a-zA-Z0-9_-]{1,100}$/.test(preset.id))throw new Error('Invalid preset ID.');
+    const label=String(preset.label??'').trim().slice(0,60);
+    if(!label)throw new Error('The preset needs a description.');
+    const amount=Number(preset.amount);
+    if(!Number.isSafeInteger(amount)||Math.abs(amount)>1e12)throw new Error('Invalid preset amount.');
+    return {id:preset.id,label,amount,quantity:parseLabel(label).quantity};
+  }
+
   function validateProfile(profile,version=2) {
     if(!profile||typeof profile!=='object')throw new Error('Invalid profile.');
     if(typeof profile.id!=='string'||!/^[a-zA-Z0-9_-]{1,64}$/.test(profile.id))throw new Error('Invalid profile ID.');
@@ -261,6 +272,12 @@
     const tabs=validateTabs(profile.tabs);
     if(tabs.length)result.tabs=tabs;
     if(typeof profile.activeTab==='string'&&tabs.includes(profile.activeTab))result.activeTab=profile.activeTab;
+    // The presets of expense, used to add the same cost again and again.
+    const presets=(Array.isArray(profile.presets)?profile.presets.map(validatePreset):[]);
+    if(presets.length>100)throw new Error('Too many presets.');
+    const presetIds=new Set();
+    for(const preset of presets){if(presetIds.has(preset.id))throw new Error('Duplicate preset ID.');presetIds.add(preset.id);}
+    if(presets.length)result.presets=presets;
     // The photo is a small PNG kept as a data url, so the backup carries it too.
     // The photo is a small PNG as a data url, or a file kept in the assets folder.
     if(typeof profile.photo==='string'&&((/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(profile.photo)&&profile.photo.length<=500000)||/^assets\/[A-Za-z0-9._-]+\.png$/.test(profile.photo)))result.photo=profile.photo;

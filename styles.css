@@ -60,6 +60,18 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .expense-total{display:grid;grid-template-columns:minmax(110px,1fr) 116px 26px;gap:10px;align-items:center;padding:7px 0 0;margin-top:6px;border-top:1px solid var(--edge);font-size:15px;font-variant-numeric:tabular-nums}
 .expense-total span:first-child{color:var(--muted);font-size:14px}.expense-total span:nth-child(2){text-align:right}
 #tab-dialog{width:min(400px,calc(100% - 28px))}
+.range-group{display:flex;margin-left:auto}
+.preset-button{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:8px 14px}
+.preset-button .coin{margin-left:0}
+#preset-dialog{width:min(460px,calc(100% - 28px))}
+.preset-list{display:flex;flex-direction:column;gap:4px;margin:0 0 16px}
+.preset-row{display:flex;align-items:stretch;gap:4px}
+.preset-use{flex:1;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:36px;padding:6px 12px;font-size:14px;font-weight:normal;text-align:left;background-color:#3f413b}
+.preset-use .preset-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preset-use .preset-cost{font-weight:bold;font-variant-numeric:tabular-nums;white-space:nowrap}
+.preset-use:hover{filter:brightness(1.15)}
+.preset-remove{width:30px;min-height:36px;padding:0;font-size:16px;line-height:1;color:var(--muted);background-color:#3f413b}
+.preset-remove:hover{color:var(--bad)}
 #expense-dialog{width:min(440px,calc(100% - 28px))}
 #expense-dialog .dialog-title{padding-bottom:12px;margin-bottom:14px}
 .expense-form{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center;margin:0}

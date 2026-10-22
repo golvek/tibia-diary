@@ -116,6 +116,15 @@ log e a contagem recomeca. O dia de corte vem do **Daily reset** do perfil — c
 06:00, uma caca que comecou as 03:00 conta no dia anterior. O log e os periodos em andamento
 vão no backup `.json`.
 
+## Presets de despesa
+
+O botao **Presets** (no canto direito da barra, ao lado da data) abre a lista de custos
+salvos. Para criar um, digite a descricao e o preco de um item (`2x silver token` e `40k`) e
+salve: o preset guarda o preco **de um** item, entao `2x silver token` sai por `80.000`.
+
+Clicar num preset **joga a despesa na caca da tab em uso** (a mais recente do dia), e o
+balance dela ja cai com o custo. O `×` apaga o preset. Os presets sao do perfil e vao no backup.
+
 ## Despesas extras
 
 O Hunt Analyzer nao conta tudo: um *recall* de 1 hora por 80k, suprimentos comprados na
