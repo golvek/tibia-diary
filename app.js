@@ -499,7 +499,7 @@ function quickItemsMarkup(){
     const label=quantity>1?`${quantity}× ${name}`:name;
     const total=preset.amount*quantity;
     const picture=preset.icon?`<img class="quick-item-img" src="assets/${esc(preset.icon)}" alt="" onerror="this.remove()">`:'';
-    return `<button type="button" class="quick-item" data-use-preset="${esc(preset.id)}" title="Add ${esc(label)} — ${esc(number(total))} to the last hunt">${picture}<span class="quick-item-name">${esc(label)}</span><span class="quick-item-cost">${esc(compact(total))}</span></button>`;
+    return `<span class="quick-item-box"><button type="button" class="quick-item" data-use-preset="${esc(preset.id)}" title="Add ${esc(label)} — ${esc(number(total))} to the last hunt">${picture}<span class="quick-item-name">${esc(label)}</span><span class="quick-item-cost">${esc(compact(total))}</span></button><button type="button" class="quick-item-remove" data-remove-preset="${esc(preset.id)}" aria-label="Remove the item ${esc(label)}" title="Remove this item">×</button></span>`;
   }).join('');
 }
 function usePreset(id,hunt){
@@ -512,18 +512,6 @@ function usePreset(id,hunt){
   if(!save({...state,expenses:[...state.expenses,expense]}))return;
   toast(`Added ${name}: ${number(amount)}.`);
 }
-// The presets of expense: click one to add that cost to the hunt of the tab.
-function renderPresets(){
-  const presets=state.presets||[];
-  $('preset-list').innerHTML=presets.length
-    ? presets.map(preset=>{
-      const {quantity,name}=Diary.parseLabel(preset.label);
-      const label=quantity>1?`${quantity}× ${name}`:name;
-      const total=preset.amount*quantity;
-      return `<div class="preset-row"><button type="button" class="preset-use" data-use-preset="${esc(preset.id)}" title="Add this cost to the current hunt"><span class="preset-name">${esc(label)}</span><span class="preset-cost">${esc(number(total))}<span class="coin" aria-hidden="true"></span></span></button><button type="button" class="preset-remove" data-remove-preset="${esc(preset.id)}" aria-label="Remove the preset ${esc(label)}">×</button></div>`;
-    }).join('')
-    : '<p class="muted">No preset yet.</p>';
-}
 function addPreset(){
   const label=$('preset-label').value.trim().slice(0,60);
   const unit=Diary.parseAmount($('preset-amount').value);
@@ -535,11 +523,9 @@ function addPreset(){
   const presets=[...(state.presets||[]),{id:newId(),label,amount:unit,quantity,icon}];
   $('preset-label').value='';$('preset-amount').value='';$('preset-icon').value='';$('preset-preview').textContent='';
   save({...state,presets});
-  renderPresets();
 }
 function removePreset(id){
   save({...state,presets:(state.presets||[]).filter(p=>p.id!==id)});
-  renderPresets();
 }
 function updatePresetPreview(){
   const unit=Diary.parseAmount($('preset-amount').value);
@@ -570,19 +556,14 @@ $('preset-gallery').addEventListener('click',e=>{
   $('preset-icon').value=picture.dataset.picture;
 });
 $('presets-open').onclick=()=>{
-  renderPresets();
   renderImageGallery();
   $('preset-dialog').showModal();
   $('preset-label').focus();
 };
-$('preset-list').addEventListener('click',e=>{
-  const remove=e.target.closest('[data-remove-preset]');
-  if(remove){removePreset(remove.dataset.removePreset);return;}
-  const use=e.target.closest('[data-use-preset]');
-  if(use){usePreset(use.dataset.usePreset);$('preset-dialog').close();}
-});
 // The quick items on the screen: one click and the cost lands on the last hunt.
 $('tabs-bar').addEventListener('click',e=>{
+  const remove=e.target.closest('[data-remove-preset]');
+  if(remove){removePreset(remove.dataset.removePreset);return;}
   const item=e.target.closest('[data-use-preset]');
   if(item){usePreset(item.dataset.usePreset,lastHunt());return;}
 });
