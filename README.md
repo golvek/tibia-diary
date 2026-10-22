@@ -118,20 +118,18 @@ vão no backup `.json`.
 
 ## Presets de despesa
 
-O botao **Presets** (no canto direito da barra, ao lado da data) abre a lista de custos
-salvos. Para criar um, digite a descricao e o preco de um item (`2x silver token` e `40k`) e
-salve: o preset guarda o preco **de um** item, entao `2x silver token` sai por `80.000`.
+O botao **Itens** (no canto direito da barra, ao lado da data) abre a janela com a **lista de
+itens**: la voce cria, usa, fixa e apaga. Para criar um, digite a descricao e o preco de um item
+(`2x silver token` e `40k`) e salve: o item guarda o preco **de um**, entao `2x silver token` sai
+por `80.000`.
 
-Clicar num preset **joga a despesa na caca da tab em uso** (a mais recente do dia), e o
-balance dela ja cai com o custo. O `×` apaga o preset. Os presets sao do perfil e vao no backup.
+O item pode ter a **imagem**: no campo `Picture` da janela, ou clicando na miniatura da galeria.
+As miniaturas vem da lista `assets/images.json` — para usar uma imagem nova, ponha o arquivo na
+pasta `assets/` e acrescente o nome na lista.
 
-Cada preset pode ter a **imagem do item**: no campo `Picture` da janela de presets, ou clicando
-na miniatura da galeria. As miniaturas vem da lista `assets/images.json` — para usar uma imagem
-nova, ponha o arquivo na pasta `assets/` e acrescente o nome na lista.
-
-O preset vira um **item na barra das tabs**, logo acima dos logs: um clique e a despesa cai nas
-**expenses do ultimo log colado**, sem precisar abrir nenhuma janela. A janela de presets so
-serve para criar e apagar itens.
+O **alfinete** da lista fixa o item ao lado do botao Itens, na barra de cima: ai fica so a
+miniatura (o nome e o preco aparecem no tooltip, quando o mouse passa por cima) e **um clique** joga
+a despesa nas **expenses do ultimo log colado**, sem abrir nenhuma janela.
 
 **Itens rapidos:** os presets aparecem tambem numa **barra em cima dos logs**, sem abrir
 nenhuma janela — um clique e a despesa cai no **ultimo log colado**. Da para colocar a
