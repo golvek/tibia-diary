@@ -118,8 +118,10 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .paste-hint-keys b{color:var(--muted);font-weight:bold}
 .paste-hint-keys kbd{font-family:Consolas,'Courier New',monospace;font-size:22px;background:var(--panel);border:1px solid var(--edge);padding:6px 14px;box-shadow:inset 1px 1px var(--shadow),1px 1px var(--shine)}
 .paste-hint-text{font-size:18px}
-/* The content of the tab, in the frame of the client window. */
-.tab-content{margin-top:-1px;padding:12px 14px 14px;background:var(--inset);border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shadow),1px 1px var(--shine)}
+/* The content of the tab, in the frame of the client window. The height is
+   fixed, so the frame does not jump when a hunt is pasted: the extra hunts
+   scroll inside it. */
+.tab-content{margin-top:-1px;padding:12px 14px 14px;background:var(--inset);border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shadow),1px 1px var(--shine);height:calc(100vh - 276px);min-height:260px;overflow-y:auto;overscroll-behavior:contain}
 .tab-content .paste-hint{margin:0}
 .range-open{min-height:42px;font-size:14px;padding:8px 14px}
 /* The week and month view: a table with the date, the raw XP and the balance,
@@ -182,7 +184,7 @@ body.dragging .trash{opacity:1;transform:translateY(0) scale(1);pointer-events:a
 .bar-balance.negative{color:var(--bad)}
 body.has-totals-bar .trash{bottom:70px}
 @media(max-width:900px){.range-view{display:block}}
-@media(max-width:650px){.range-table th.col-xp{width:120px}.range-table th.col-balance{width:140px}.range-table th{padding:0 8px 7px}.range-table td{padding:8px}.range-table td,.range-table td button.range-link{font-size:14px}.range-weekday{margin-right:4px}.totals-bar{gap:12px;padding:7px 10px}.bar-total{gap:8px;font-size:14px}.bar-balance{font-size:17px}.bar-face{width:22px;height:22px}}
+@media(max-width:650px){.range-table th.col-xp{width:120px}.range-table th.col-balance{width:140px}.range-table th{padding:0 8px 7px}.range-table td{padding:8px}.range-table td,.range-table td button.range-link{font-size:14px}.range-weekday{margin-right:4px}.totals-bar{gap:12px;padding:7px 10px}.bar-total{gap:8px;font-size:14px}.bar-balance{font-size:17px}.bar-face{width:22px;height:22px}.tab-content{height:calc(100vh - 240px);min-height:200px}}
 #view-calendar{border:1px solid var(--edge);box-shadow:inset 1px 1px var(--shine),inset -1px -1px var(--shadow);background:var(--panel);max-width:1320px;margin:24px auto;padding:0 18px 18px}
 .view-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 0 6px}
 .range-toggle{display:flex}
