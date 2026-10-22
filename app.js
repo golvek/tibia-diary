@@ -255,6 +255,9 @@ function listMarkup(values){return visible().filter(f=>f.type==='list').map(f=>{
 // bearing, so they line up pixel by pixel with the data below.
 const ICON_SVG='<svg class="card-svg" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="#9fd66b" d="M2 13V7h3v6H2zm4.5 0V3h3v10h-3zM11 13V9h3v4h-3z"/></svg>';
 const REPORT_SVG='<svg class="card-svg" viewBox="0 0 16 16" width="10" height="10" aria-hidden="true"><path fill="currentColor" d="M9 1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5L9 1zm0 1.7L11.3 5H9V2.7zM5 7.5h6v1.2H5V7.5zm0 2.6h6v1.2H5v-1.2zm0-5h2.5v1.2H5V5.1z"/></svg>';
+// The button that minimizes every analyzer, like the client window.
+const MINIMIZE_SVG='<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3.5 11.5h9"/></svg>';
+const EXPAND_SVG='<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9"/><path d="M6 6h4v4H6z"/></svg>';
 const LOCK_SVG='<svg class="card-svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.2" y="7" width="9.6" height="6.6" rx="1"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7"/></svg>';
 const UNLOCK_SVG='<svg class="card-svg" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.2" y="7" width="9.6" height="6.6" rx="1"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.5-1.3"/></svg>';
 // Cards can be minimized, keeping only the session length and the balance.
@@ -518,8 +521,8 @@ function renderTabs(){
   // The M collapses or expands every analyzer of the day, like the client window.
   const shown=[...document.querySelectorAll('#sessions .analyser-card')].map(c=>c.dataset.id);
   const collapsed=shown.length>0&&shown.every(id=>minimizedCards.has(id));
-  const collapse=`<button type="button" class="tab-close" data-collapse-all="M" aria-pressed="${collapsed}" title="${collapsed?'Expand every analyzer':'Minimize every analyzer'}" aria-label="${collapsed?'Expand':'Minimize'} every analyzer">M</button>`;
-  $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button>`+collapse+close;
+  const collapse=`<button type="button" class="tab-close" data-collapse-all="minimize" aria-pressed="${collapsed}" title="${collapsed?'Expand every analyzer':'Minimize every analyzer'}" aria-label="${collapsed?'Expand':'Minimize'} every analyzer">${collapsed?EXPAND_SVG:MINIMIZE_SVG}</button>`;
+  $('tabs-bar').innerHTML=all+list+`<button type="button" class="tab add" data-new-tab="+">+</button><span class="tab-buttons">${collapse}${close}</span>`;
 }
 // Every analyzer of the day can be collapsed or expanded at once.
 function toggleCollapseAll(){
