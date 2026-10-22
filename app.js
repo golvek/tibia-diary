@@ -290,12 +290,12 @@ function sessionCard(s,index){
     return `<details class="card-section" data-key="${esc(key)}"${expandedSections.has(key)?' open':''}><summary>${esc(f.label)}</summary>${body}</details>`;
   }).join('');
   const shift=day(s)!==s.date?` · Day ${shortDate(day(s))}`:'';
-  // Inside a tab the hunt is numbered; the name of the tab shows in All.
+  // Inside a tab the hunt is numbered, unless it has a name of its own.
+  // The name of the tab shows in All.
   const inTab=!!state.activeTab;
-  const title=inTab?String(index):(s.name||'Hunt Analyser');
-  const titleMarkup=inTab
-    ? `<span class="card-title plain">${esc(title)}</span>`
-    : `<span class="card-title" data-title="${esc(s.id)}" data-rename="${esc(s.id)}" role="button" tabindex="0" title="Click to rename this hunt">${esc(title)}</span>`;
+  const own=!!s.name&&(!s.group||s.name!==s.group);
+  const title=inTab?(own?s.name:String(index)):(s.name||'Hunt Analyser');
+  const titleMarkup=`<span class="card-title" data-title="${esc(s.id)}" data-rename="${esc(s.id)}" role="button" tabindex="0" title="Click to rename this hunt">${esc(title)}</span>`;
   const toggle=`<button type="button" class="card-minimize" data-minimize="${esc(s.id)}" title="${minimized?'Expand':'Minimize'}" aria-label="${minimized?'Expand':'Minimize'} ${esc(title)}">${minimized?'+':'−'}</button>`;
   const report=`<button type="button" class="card-report" data-detail="${esc(s.id)}" title="Open the original report" aria-label="Open the original report">${REPORT_SVG}</button>`;
   return `<article class="analyser-card${minimized?' minimized':''}" draggable="true" data-id="${esc(s.id)}"><header><span class="card-heading"><span class="card-icon" aria-hidden="true">${ICON_SVG}</span>${titleMarkup}</span><span class="card-window">${report}${toggle}</span></header>${minimized?'':`<p class="card-time">${esc(s.start?s.start.slice(11):'—')} → ${esc(s.end?s.end.slice(11):'—')}${esc(shift)}</p>`}<dl>${rows}</dl>${minimized?'':`${expenseSection(s,expenses)}<div class="card-lists">${lists}</div>`}</article>`;
