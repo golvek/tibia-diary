@@ -60,7 +60,7 @@ function closeOnBackdrop(dialog,onClose){
     dialog.close();
   });
 }
-for(const id of ['detail-dialog','backup-dialog','statement-dialog','expense-dialog','profile-dialog','settings-dialog'])closeOnBackdrop($(id));
+for(const id of ['detail-dialog','backup-dialog','statement-dialog','expense-dialog','profile-dialog','settings-dialog','tab-dialog'])closeOnBackdrop($(id));
 closeOnBackdrop($('confirm-dialog'),()=>{confirmAction=null;});
 function importAnalyzer(raw){
   if(!raw.trim()){status('Paste a complete report.',true);return;}
