@@ -547,8 +547,32 @@ function updatePresetPreview(){
   const {quantity}=Diary.parseLabel($('preset-label').value);
   $('preset-preview').textContent=unit===null?'':`= ${number(unit*quantity)}${quantity>1?` (${quantity}×)`:''}`;
 }
+// The pictures of the items, listed in assets/images.json, so the user can
+// pick one with a click instead of typing the file name.
+let imageList=null;
+function loadImageList(){
+  if(imageList)return Promise.resolve(imageList);
+  return fetch('assets/images.json').then(response=>response.ok?response.json():null).then(data=>{
+    imageList=Array.isArray(data&&data.images)?data.images.filter(name=>/^[A-Za-z0-9._-]+\.(gif|png|jpg|jpeg|webp)$/i.test(name)):[]
+    return imageList;
+  }).catch(()=>{imageList=[];return imageList;});
+}
+function renderImageGallery(){
+  const gallery=$('preset-gallery');
+  loadImageList().then(images=>{
+    gallery.innerHTML=images.length
+      ? images.map(name=>`<button type="button" class="preset-picture" data-picture="${esc(name)}" title="${esc(name)}"><img src="assets/${esc(name)}" alt="${esc(name)}"></button>`).join('')
+      : '';
+  });
+}
+$('preset-gallery').addEventListener('click',e=>{
+  const picture=e.target.closest('[data-picture]');
+  if(!picture)return;
+  $('preset-icon').value=picture.dataset.picture;
+});
 $('presets-open').onclick=()=>{
   renderPresets();
+  renderImageGallery();
   $('preset-dialog').showModal();
   $('preset-label').focus();
 };
